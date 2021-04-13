@@ -2,7 +2,6 @@
 My 15-112 project is called ________. 
 
 # Overview:
-
 -Roguelike Game
 -Everything is randomized
 -Random Dungeon generator, that has multiple levels
