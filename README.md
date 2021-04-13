@@ -15,4 +15,3 @@ My 15-112 project is called ________.
 -Once a player goes down a floor the data storing the floor above should clear the data so that the game doesn't get too slow. 
 -Once the player enters a room the doors lock until the player defeats all of the monsters.
 
-This is a test
