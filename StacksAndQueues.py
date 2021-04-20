@@ -1,3 +1,5 @@
+#classes taken from: https://stackabuse.com/stacks-and-queues-in-python/
+
 class Stack(object):
     def __init__(self):
         self.stack = []

@@ -1,5 +1,4 @@
 from cmu_112_graphics import *
-from StacksAndQueues import Queue
 import math, random, string
 
 def appStarted(app):
@@ -10,6 +9,7 @@ def appStarted(app):
     app.rooms = []
     app.selectionRooms = []
 
+#influenced by https://youtu.be/tUskxXXTh7s?t=59
 def generateRooms(app):
     app.rooms = []
     app.selectionRooms = []

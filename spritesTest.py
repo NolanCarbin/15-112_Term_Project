@@ -1,12 +1,8 @@
-# This demos sprites using Pillow/PIL images
-# See here for more details:
-# https://pillow.readthedocs.io/en/stable/reference/Image.html
+#influenced from the spritesheet section of https://www.cs.cmu.edu/~112/notes/notes-animations-part4.html
 
-# This uses a spritestrip from this tutorial:
-# https://www.codeandweb.com/texturepacker/tutorials/how-to-create-a-sprite-sheet
+#sprite image taken from: https://luizmelo.itch.io/wizard-pack
 
 from cmu_112_graphics import *
-
 
 def appStarted(app):
     idleImage = 'images/Wizard Pack/Idle.png'
@@ -50,6 +46,7 @@ def keyPressed(app, event):
         app.cx -= app.movementSpeed
         app.isMoving = True
         if not app.flipped:
+            app.flipped = True
             for i in range(len(app.idleSprites)):
                 app.idleSprites[i] = app.idleSprites[i].transpose(Image.FLIP_LEFT_RIGHT)
             for i in range(len(app.attack1Sprites)):
@@ -58,12 +55,13 @@ def keyPressed(app, event):
                 app.attack2Sprites[i] = app.attack2Sprites[i].transpose(Image.FLIP_LEFT_RIGHT)
             for i in range(len(app.runSprites)):
                 app.runSprites[i] = app.runSprites[i].transpose(Image.FLIP_LEFT_RIGHT)
-            app.flipped = True
+            
 
     elif event.key in ['d', 'Right']: 
         app.cx += app.movementSpeed
         app.isMoving = True
         if app.flipped:
+            app.flipped = False
             for i in range(len(app.idleSprites)):
                 app.idleSprites[i] = app.idleSprites[i].transpose(Image.FLIP_LEFT_RIGHT)
             for i in range(len(app.attack1Sprites)):
@@ -72,8 +70,7 @@ def keyPressed(app, event):
                 app.attack2Sprites[i] = app.attack2Sprites[i].transpose(Image.FLIP_LEFT_RIGHT)
             for i in range(len(app.runSprites)):
                 app.runSprites[i] = app.runSprites[i].transpose(Image.FLIP_LEFT_RIGHT)
-            app.flipped = False
-
+            
     elif event.key == 'Space': 
         app.attackingCounter = 0
         app.attacking1 = True
@@ -114,6 +111,7 @@ def redrawAll(app, canvas):
 
 def appStopped(app):
     pass
+
 runApp(width=600, height=500)
 
 
@@ -126,8 +124,8 @@ runApp(width=600, height=500)
 
 
 # def appStarted(app):
-#     backgroundSource = 'dungeonBackground.png'
-#     imageSource = 'Wizard Pack/Idle.png'
+#     backgroundSource = 'images/dungeonBackground.png'
+#     imageSource = 'images/Wizard Pack/Idle.png'
 #     app.image = app.loadImage(imageSource)
 #     app.backgroundImage = app.loadImage(backgroundSource)
 #     app.scaledBackgroundImage = app.scaleImage(app.backgroundImage, .8)
