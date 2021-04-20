@@ -1,4 +1,5 @@
 from cmu_112_graphics import *
+from StacksAndQueues import Queue
 import math, random, string
 
 def appStarted(app):
@@ -25,6 +26,7 @@ def generateRooms(app):
         randomRoom = random.choice(app.selectionRooms)
         app.rooms.append(randomRoom)
         app.selectionRooms.remove(randomRoom)
+    
     
 def keyPressed(app, event):
     if event.key == 'r':
