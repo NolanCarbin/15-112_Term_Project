@@ -1,0 +1,22 @@
+Project Description:
+    Name - 
+    Description -
+
+Competitive Analysis:
+    1-2 paragraph analysis of similar projects, how my project will be similar or different to those
+
+Structural Plan:
+    A plan for how the finalized project will be organized in different functions, files, and/or objects.
+
+Algorithmic Plan:
+    A detailed algorithmic plan for how I  will approach the trickiest part of the project. 
+
+Timeline Plan:
+    Timeline for when the major features of the project will be completed
+
+Version Control Plan:
+    Short description and image demonstrating how I will use version control to back up my code.
+
+Module List:
+    List of all outside modules.
+

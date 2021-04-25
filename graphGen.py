@@ -23,7 +23,7 @@ def isConnected(x0, y0, x1, y1):
     return ((abs(x0 - x1) == 0 and abs(y0 - y1) == 1) or 
     (abs(x0 - x1) == 1 and abs(y0 - y1) == 0))
 
-print(createAdjacencyList(L))
+# print(createAdjacencyList(L))
 
 
 #Use BFS to find the farthest cell from starting cell
@@ -35,3 +35,6 @@ print(createAdjacencyList(L))
 #   the cell with the most amount of nodes inbetween
 def findFarthestRoom(graph, root):
     pass
+
+
+
