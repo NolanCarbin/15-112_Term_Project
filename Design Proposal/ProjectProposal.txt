@@ -1,21 +1,38 @@
 Project Description:
     Name - 
-    Description -
+    Description - ____ is dungeon crawler video game, that has many randomized aspects, including randomly generated floors, monsters, items, etc. 
 
 Competitive Analysis:
     1-2 paragraph analysis of similar projects, how my project will be similar or different to those
 
 Structural Plan:
     A plan for how the finalized project will be organized in different functions, files, and/or objects.
+    All files will be stored in the 15-112_Term_Project folder.
+    The main program will be kept in the app.py file, and which will hold all of the main cmu_112_graphics functions, as well as all drawing functions. app.py will import the classes files which will hold the Room, Player, Monster, SpriteSheet classes. App.py will also import functions.py which will store all of the non-main functions. All images will be kept in the images folder
 
 Algorithmic Plan:
-    A detailed algorithmic plan for how I  will approach the trickiest part of the project. 
+    A detailed algorithmic plan for how I will approach the trickiest part of the project:
+    The trickiest part of the project will be implementing the A* algorithm so that the monsters are trying to find/attack the player. 
+        -First I need to understand how A*'s algorithm works. 
+        -Then I need to figure out how to implement it in a non-grid format
+        -Then I need to implement it into each monster in my monsters list 
+    Another tricky part will be creating and implementing items that will affect the player
+        -Once I have a list of items, possible in a Items object, I will be able to randomly select from the list and randomly place the item in a room 
+    Another tricky part will be working around the OS key press delay, this is a crucial part that needs to be either fixed by changing the OS system settings for when the app is opened then changing it back when its closed. 
+    Or somehow keeping track of the elapsed time from when the key is pressed and if the key is not released then that key needs to be called again so that it interupts the delay in the OS. 
+
+
 
 Timeline Plan:
-    Timeline for when the major features of the project will be completed
+    Timeline for when the major features of the project will be completed:
+    TP1: Floor object, Player object, Monster object, movement between rooms, player attack mechanics, 
+    Floor randomized generation
+    TP2: Monsters with A*, HUD(map/health), Sprites added, OS delay fixed
+    TP3: 1 or 2 different bosses, Floor theme added, Items added
 
 Version Control Plan:
     Short description and image demonstrating how I will use version control to back up my code.
+    All code is being stored in github 
 
 Module List:
     List of all outside modules.

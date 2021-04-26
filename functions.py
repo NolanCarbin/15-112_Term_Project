@@ -1,47 +1,20 @@
-from cmu_112_graphics import *
-from classes import *
-
-def appStarted(app):
-    app.rooms = Room.generateRooms(Room)
-    for room in app.rooms:
-        if room.hasPlayer:
-            app.player = room.player = Player(app.width, app.height)
-            app.currentRoom = room
-    app.doorWidth = 40
-    app.doors = {
-        'top':[app.width//2 - app.doorWidth, 0, app.width//2 + app.doorWidth, app.doorWidth//3], 
-        'bottom':[app.width//2 - app.doorWidth, app.height - app.doorWidth//3, app.width//2 + app.doorWidth, app.height],
-        'left':[0, app.height//2 - app.doorWidth, app.doorWidth//3, app.height//2 + app.doorWidth],
-        'right':[app.width - app.doorWidth//3, app.height//2 - app.doorWidth, app.width, app.height//2 + app.doorWidth]
-    }
-
-def mousePressed(app, event):
-    app.currentRoom.playerAttacks.append(app.player.attack(event.x, event.y))
-
-def keyPressed(app, event):
-    if event.key == 'r':
-        appStarted(app)
-    playerMovement(app, event)
+import math, random, string
 
 def playerMovement(app, event):
     if event.key in ['w', 'Up']:
-        app.player.cy -= app.player.speed
+        app.player.cy -= app.player.movementSpeed
         app.player.facingDirection = 'U'
     elif event.key in ['s', 'Down']:
-        app.player.cy += app.player.speed
+        app.player.cy += app.player.movementSpeed
         app.player.facingDirection = 'D'
     elif event.key in ['a', 'Left']:
-        app.player.cx -= app.player.speed
+        app.player.cx -= app.player.movementSpeed
         app.player.facingDirection = 'L'
     elif event.key in ['d', 'Right']:
-        app.player.cx += app.player.speed
+        app.player.cx += app.player.movementSpeed
         app.player.facingDirection = 'R'
     checkIfChangeOfRoom(app)
     inBoundsOfRoom(app)
-
-def timerFired(app):
-    if len(app.currentRoom.playerAttacks) > 0:
-        movePlayerAttacks(app)
 
 def movePlayerAttacks(app):
     for attack in app.currentRoom.playerAttacks: 
@@ -55,9 +28,40 @@ def movePlayerAttacks(app):
         if (attack[0] < 0 or attack[0] > app.width or 
             attack[1] < 0 or attack[1] > app.height): 
             app.currentRoom.playerAttacks.remove(attack)
-        #check if inBoundsOfMonsters: 
-        #   app.player.attacks.remove(attack)
-        
+        #check if inBoundsOfMonsters:
+        for monster in app.currentRoom.monsters:
+            if attackInBoundsOfMonster(attack[0], attack[1], attack[2], monster.cx, monster.cy, monster.width): 
+                app.currentRoom.playerAttacks.remove(attack)                
+                monster.health -= 1
+                if monster.health == 0:
+                    app.currentRoom.monsters.remove(monster)
+
+def monsterAttack(app):
+    if len(app.currentRoom.monsters) == 0: return 
+    for monster in app.currentRoom.monsters:
+        if(app.player.cx - app.player.width <= monster.cx + monster.width and app.player.cx + app.player.width >= monster.cx - monster.width and app.player.cy - app.player.width <= monster.cy + monster.width and app.player.cy + app.player.width >= monster.cy - monster.width):    app.player.health -= 1
+
+#taken from: http://www.jeffreythompson.org/collision-detection/circle-rect.php converted from another language to python 
+def attackInBoundsOfMonster(cx, cy, r, rx, ry, width):
+    testX = cx
+    testY = cy
+    if (cx < rx):        
+        testX = rx
+    elif (cx > rx + width):
+        testX = rx + width
+    if (cy < ry):
+        testY = ry
+    elif (cy > ry + width):
+        testY = ry + width
+#get distance from closest edges
+    distX = cx-testX
+    distY = cy-testY
+    distance = math.sqrt((distX * distX) + (distY * distY))
+#if the distance is less than the radius, collision!
+    if (distance <= r):
+        return True
+    return False
+
 def checkIfChangeOfRoom(app):
     #left door
     if inBoundsOfDoor(app, 'left') and checkIfAdjacentRoom(app, (0,-1)):
@@ -129,42 +133,3 @@ def newPlayerPosition(app, direction):
     elif direction == (+1,0):
         app.player.cx = app.width//2
         app.player.cy = app.doorWidth
-
-def redrawAll(app, canvas):
-    for room in app.rooms:
-        if room.hasPlayer: 
-            drawRoom(app, canvas, room)
-            drawPlayer(app, canvas)
-            drawPlayerAttacks(app, canvas)
-
-def drawPlayer(app, canvas):
-    player = app.player
-    canvas.create_rectangle(player.cx - player.width, 
-    player.cy - player.width, player.cx + player.width, player.cy + player.width)
-
-def drawPlayerAttacks(app, canvas):
-    for attack in app.currentRoom.playerAttacks:
-        cx = attack[0]
-        cy = attack[1]
-        r = attack[2]
-        canvas.create_oval(cx - r, cy - r, cx + r, cy + r, fill='white')
-
-def drawRoom(app, canvas, room):
-    canvas.create_rectangle(0, 0, app.width, app.height, fill='light grey')
-    drawDoors(app, canvas)
-
-#make doors resizable to the window in the future
-def drawDoors(app, canvas):
-    dirs = [(0,-1),(0,+1),(-1,0),(+1,0)]
-    for drow, dcol in dirs:
-        if checkIfAdjacentRoom(app, (drow,dcol)):
-            if drow == -1: #top door
-                canvas.create_rectangle(app.doors['top'][0], app.doors['top'][1], app.doors['top'][2], app.doors['top'][3])
-            elif drow == +1: #bottom door
-                canvas.create_rectangle(app.doors['bottom'][0], app.doors['bottom'][1], app.doors['bottom'][2], app.doors['bottom'][3])
-            elif dcol == -1: #left door
-                canvas.create_rectangle(app.doors['left'][0], app.doors['left'][1], app.doors['left'][2], app.doors['left'][3])
-            elif dcol == +1: #right door
-                canvas.create_rectangle(app.doors['right'][0], app.doors['right'][1], app.doors['right'][2], app.doors['right'][3])
-
-runApp(width=800, height=600)
