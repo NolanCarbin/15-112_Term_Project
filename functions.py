@@ -57,7 +57,7 @@ def attackInBoundsOfMonster(cx, cy, r, rx, ry, width):
     distX = cx-testX
     distY = cy-testY
     distance = math.sqrt((distX * distX) + (distY * distY))
-#if the distance is less than the radius, collision!
+#if the distance is less than the radius, then collision
     if (distance <= r):
         return True
     return False

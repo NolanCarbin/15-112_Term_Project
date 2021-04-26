@@ -1,14 +1,16 @@
 Project Description:
-    Name - 
-    Description - ____ is dungeon crawler video game, that has many randomized aspects, including randomly generated floors, monsters, items, etc. 
+    Name - Archelight
+    Description - Archelight is dungeon crawler video game, that has many randomized aspects, including randomly generated floors, monsters, items, etc. 
 
 Competitive Analysis:
-    1-2 paragraph analysis of similar projects, how my project will be similar or different to those
+    1 paragraph analysis of similar projects, how my project will be similar or different to those:
+    My project is very similar and takes inspiration from the game, The Binding of Isaac:Rebirth.
+    Archelight will be similar in the ideas of having multiple floors with randomly generated rooms, that contain different monsters, bosses, items. All of these things will be generated randomly so that the player has a new exprience every time they play the game, just as The Binding of Isaac does it. The theme of the game will be different, instead of having a dark/religious theme, Archelight will be more adventurous with a wizard as the main character and different monsters such as skeletons, slims, zombies. 
 
 Structural Plan:
-    A plan for how the finalized project will be organized in different functions, files, and/or objects.
+    A plan for how the finalized project will be organized in different functions, files, and/or objects:
     All files will be stored in the 15-112_Term_Project folder.
-    The main program will be kept in the app.py file, and which will hold all of the main cmu_112_graphics functions, as well as all drawing functions. app.py will import the classes files which will hold the Room, Player, Monster, SpriteSheet classes. App.py will also import functions.py which will store all of the non-main functions. All images will be kept in the images folder
+    The main program will be kept in the app.py file, which will hold all of the main cmu_112_graphics functions, as well as all drawing functions. app.py will import the classes files which will hold the Room, Player, Monster, SpriteSheet classes. App.py will also import functions.py which will store all of the non-main functions. All images will be kept in the images folder
 
 Algorithmic Plan:
     A detailed algorithmic plan for how I will approach the trickiest part of the project:
@@ -22,18 +24,22 @@ Algorithmic Plan:
     Or somehow keeping track of the elapsed time from when the key is pressed and if the key is not released then that key needs to be called again so that it interupts the delay in the OS. 
 
 
-
 Timeline Plan:
     Timeline for when the major features of the project will be completed:
-    TP1: Floor object, Player object, Monster object, movement between rooms, player attack mechanics, 
-    Floor randomized generation
+
+    TP1: Floor class/object, Player class/object, Monster class/object, movement between rooms, player attack mechanics, 
+        Floor randomized generation
+
     TP2: Monsters with A*, HUD(map/health), Sprites added, OS delay fixed
+
     TP3: 1 or 2 different bosses, Floor theme added, Items added
 
 Version Control Plan:
     Short description and image demonstrating how I will use version control to back up my code.
-    All code is being stored in github 
+    All code is being stored in my github account. I cloned the repository to my local files and update it using 
+    github desktop. 
 
 Module List:
-    List of all outside modules.
+    List of all outside modules:
+    PIL/Pillow
 
