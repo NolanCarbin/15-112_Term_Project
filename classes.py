@@ -10,6 +10,7 @@ class Room(object):
         self.hasPlayer = False
         self.player = None
         self.playerAttacks = []
+        self.monsters = []
 
     def __repr__(self):
         return f'Room({self.cell}, Spawn:{self.cell == (5,5)}, HasPlayer:{self.hasPlayer}, Player:{self.player})'
@@ -71,8 +72,16 @@ class Player(object):
         return (deltaX, deltaY)
 
 class Monster(object):
-    def __init__(self):
-        pass
+    def __init__(self, appWidth, appHeight):
+        self.width = 20
+        self.cx = random.randint(self.width, appWidth)
+        self.cy = random.randint(self.height, appHeight)
+        self.speed = 5
+        self.health = 5
+
+    def __repr__(self):
+        return f'Monster(Location:{(self.cx, self.cy)}, Health:{self.health})'
+
 
 class Spritesheet(object):
     def __init__(self):
