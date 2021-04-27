@@ -1,7 +1,7 @@
 from cmu_112_graphics import *
 from classes import *
 from functions import * 
-import random, math, string
+import random, time
 
 def appStarted(app):
     app.rooms = Room.generateRooms(Room)
@@ -22,18 +22,43 @@ def appStarted(app):
         'right':[app.width - app.doorWidth//3, app.height//2 - app.doorWidth, app.width, app.height//2 + app.doorWidth]
     }
     app.gameOver = False
+    ##################
+    app.keyPressedTimer = None
+    app.totalKeyPressedTimer = None
+    app.lastKeyPressed = None
+    ##################
     print(app.currentRoom)
     
 def mousePressed(app, event):
     app.currentRoom.playerAttacks.append(app.player.attack(event.x, event.y))
 
 def keyPressed(app, event):
+    ###################
+    app.keyPressedTimer = time.time()
+    app.totalKeyPressedTimer = time.time()
+    app.lastKeyPressed = event.key
+    ###################
     if event.key == 'r':
         Room.rooms = []
+        Room.selectionRooms = []
         appStarted(app)
-    playerMovement(app, event)
+    playerMovement(app, event.key)
+
+def keyReleased(app, event):
+    app.keyPressedTimer = None
+    app.totalKeyPressedTimer = None
+    app.lastKeyPressed = None
 
 def timerFired(app):
+    ##################
+    if app.keyPressedTimer != None and time.time() - app.keyPressedTimer >= 0.02:
+        playerMovement(app, app.lastKeyPressed) 
+        app.keyPressedTimer = time.time() #reset the timer
+    #Lets the OS repeat the function call
+    if app.totalKeyPressedTimer != None and time.time() - app.totalKeyPressedTimer >= 0.5: 
+        app.keyPressedTimer = None
+        app.totalKeyPressedTimer = None
+    ##################
     if len(app.currentRoom.playerAttacks) > 0:
         movePlayerAttacks(app)
     if app.player.health <= 0:
@@ -44,12 +69,10 @@ def redrawAll(app, canvas):
     if app.gameOver:
         drawGameOver(app, canvas)
     else:
-        for room in app.rooms:
-            if room.hasPlayer: 
-                drawRoom(app, canvas, room)
-                drawPlayer(app, canvas)
-                drawPlayerAttacks(app, canvas)
-                drawMonsters(app, canvas)
+        drawRoom(app, canvas)
+        drawPlayer(app, canvas)
+        drawPlayerAttacks(app, canvas)
+        drawMonsters(app, canvas)
 
 def drawPlayer(app, canvas):
     player = app.player
@@ -63,24 +86,24 @@ def drawPlayerAttacks(app, canvas):
         r = attack[2]
         canvas.create_oval(cx - r, cy - r, cx + r, cy + r, fill='white')
 
-def drawRoom(app, canvas, room):
+def drawRoom(app, canvas):
     canvas.create_rectangle(0, 0, app.width, app.height, fill='light grey')
     drawDoors(app, canvas)
 
 #make doors resizable to the window in the future
 def drawDoors(app, canvas):
     dirs = [(0,-1),(0,+1),(-1,0),(+1,0)]
-    clr = 'dark grey'
+    color = 'dark grey'
     for drow, dcol in dirs:
         if checkIfAdjacentRoom(app, (drow,dcol)):
             if drow == -1: #top door
-                canvas.create_rectangle(app.doors['top'][0], app.doors['top'][1], app.doors['top'][2], app.doors['top'][3], fill=clr)
+                canvas.create_rectangle(app.doors['top'][0], app.doors['top'][1], app.doors['top'][2], app.doors['top'][3], fill=color)
             elif drow == +1: #bottom door
-                canvas.create_rectangle(app.doors['bottom'][0], app.doors['bottom'][1], app.doors['bottom'][2], app.doors['bottom'][3], fill=clr)
+                canvas.create_rectangle(app.doors['bottom'][0], app.doors['bottom'][1], app.doors['bottom'][2], app.doors['bottom'][3], fill=color)
             elif dcol == -1: #left door
-                canvas.create_rectangle(app.doors['left'][0], app.doors['left'][1], app.doors['left'][2], app.doors['left'][3], fill=clr)
+                canvas.create_rectangle(app.doors['left'][0], app.doors['left'][1], app.doors['left'][2], app.doors['left'][3], fill=color)
             elif dcol == +1: #right door
-                canvas.create_rectangle(app.doors['right'][0], app.doors['right'][1], app.doors['right'][2], app.doors['right'][3], fill=clr)
+                canvas.create_rectangle(app.doors['right'][0], app.doors['right'][1], app.doors['right'][2], app.doors['right'][3], fill=color)
 
 def drawMonsters(app, canvas):
     for monster in app.currentRoom.monsters:

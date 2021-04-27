@@ -1,4 +1,5 @@
 import random
+
 class Room(object):
     rooms = []
     selectionRooms = []

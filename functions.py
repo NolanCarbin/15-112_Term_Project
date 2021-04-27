@@ -1,18 +1,14 @@
 import math, random, string
 
-def playerMovement(app, event):
-    if event.key in ['w', 'Up']:
+def playerMovement(app, key):
+    if key in ['w', 'Up']:
         app.player.cy -= app.player.movementSpeed
-        app.player.facingDirection = 'U'
-    elif event.key in ['s', 'Down']:
+    elif key in ['s', 'Down']:
         app.player.cy += app.player.movementSpeed
-        app.player.facingDirection = 'D'
-    elif event.key in ['a', 'Left']:
+    elif key in ['a', 'Left']:
         app.player.cx -= app.player.movementSpeed
-        app.player.facingDirection = 'L'
-    elif event.key in ['d', 'Right']:
+    elif key in ['d', 'Right']:
         app.player.cx += app.player.movementSpeed
-        app.player.facingDirection = 'R'
     checkIfChangeOfRoom(app)
     inBoundsOfRoom(app)
 
@@ -41,7 +37,8 @@ def monsterAttack(app):
     for monster in app.currentRoom.monsters:
         if(app.player.cx - app.player.width <= monster.cx + monster.width and app.player.cx + app.player.width >= monster.cx - monster.width and app.player.cy - app.player.width <= monster.cy + monster.width and app.player.cy + app.player.width >= monster.cy - monster.width):    app.player.health -= 1
 
-#taken from: http://www.jeffreythompson.org/collision-detection/circle-rect.php converted from another language to python 
+#taken from: http://www.jeffreythompson.org/collision-detection/circle-rect.php 
+#converted from another language to python 
 def attackInBoundsOfMonster(cx, cy, r, rx, ry, width):
     testX = cx
     testY = cy
