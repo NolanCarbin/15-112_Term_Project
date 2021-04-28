@@ -1,7 +1,14 @@
 from cmu_112_graphics import *
-from classes import *
-from functions import * 
+from monsters import *
+from player import * 
+from rooms import *
 import random, time
+
+
+#############
+#Main App
+#############
+
 
 def appStarted(app):
     app.rooms = Room.generateRooms(Room)
@@ -13,7 +20,7 @@ def appStarted(app):
     for room in app.rooms:
         if room.cell != (5,5):
             for i in range(random.randint(1,5)):
-                room.generateMonster(Monster(app.width,app.height))
+                room.generateMonster(app.width, app.height)
     app.doorWidth = 40
     app.doors = {
         'top':[app.width//2 - app.doorWidth, 0, app.width//2 + app.doorWidth, app.doorWidth//3], 
@@ -33,6 +40,9 @@ def mousePressed(app, event):
     app.currentRoom.playerAttacks.append(app.player.attack(event.x, event.y))
 
 def keyPressed(app, event):
+    print(app.player.cx, app.player.cy)
+    for monster in app.currentRoom.monsters:
+        print('   ', monster.cx, monster.cy)
     ###################
     app.keyPressedTimer = time.time()
     app.totalKeyPressedTimer = time.time()
@@ -71,9 +81,14 @@ def redrawAll(app, canvas):
     else:
         drawRoom(app, canvas)
         drawPlayer(app, canvas)
+        drawDoors(app, canvas)
         drawPlayerAttacks(app, canvas)
         drawMonsters(app, canvas)
 
+
+#####################
+#Drawing Functions
+#####################
 def drawPlayer(app, canvas):
     player = app.player
     canvas.create_rectangle(player.cx - player.width, 
@@ -88,8 +103,7 @@ def drawPlayerAttacks(app, canvas):
 
 def drawRoom(app, canvas):
     canvas.create_rectangle(0, 0, app.width, app.height, fill='light grey')
-    drawDoors(app, canvas)
-
+    
 #make doors resizable to the window in the future
 def drawDoors(app, canvas):
     dirs = [(0,-1),(0,+1),(-1,0),(+1,0)]
@@ -115,4 +129,8 @@ def drawGameOver(app, canvas):
     canvas.create_rectangle(0,0,app.width, app.height, fill='black')
     canvas.create_text(app.width//2, app.height//2, text='GAMEOVER!\nYOU DIED!\nPress r to restart', fill='yellow', font='Arial 24 bold')
 
+
+
+##############
 runApp(width=800, height=600)
+##############
