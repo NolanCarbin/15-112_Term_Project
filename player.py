@@ -13,11 +13,11 @@ class Player(object):
     def __repr__(self):
         return f'Player(Location:{(self.cx, self.cy)}, Health:{self.health})'
 
-    def attack(self, x, y):
+    def attackWithMouse(self, app, x, y):
         radius = 8
         cx, cy = self.cx, self.cy
         deltaX, deltaY = self.findAttackDeltas(x, y, cx, cy)
-        return [cx, cy, radius, deltaX, deltaY]
+        app.currentRoom.playerAttacks.append([cx, cy, radius, deltaX, deltaY])
 
 #The math for this is not right, needs to be fixed
     def findAttackDeltas(self, x, y, cx, cy):
@@ -35,16 +35,34 @@ class Player(object):
         #Down
         elif y >= cy and y >= abs(x):
             deltaY = self.attackSpeed
+        else: 
+            return 
         return (deltaX, deltaY)
 
+    def attackWithKeys(self,app, key):
+        if key not in ['Right', 'Left', 'Up', 'Down']: return 
+        radius = 8
+        cx, cy = self.cx, self.cy
+        deltaX = 0
+        deltaY = 0
+        if key == 'Right':
+            deltaX = self.attackSpeed
+        elif key == 'Left':
+            deltaX = -self.attackSpeed
+        elif key == 'Up':
+            deltaY = -self.attackSpeed
+        elif key == 'Down':
+            deltaY = self.attackSpeed
+        app.currentRoom.playerAttacks.append([cx, cy, radius, deltaX, deltaY])
+
 def playerMovement(app, key):
-    if key in ['w', 'Up']:
+    if key == 'w':
         app.player.cy -= app.player.movementSpeed
-    elif key in ['s', 'Down']:
+    elif key == 's':
         app.player.cy += app.player.movementSpeed
-    elif key in ['a', 'Left']:
+    elif key == 'a':
         app.player.cx -= app.player.movementSpeed
-    elif key in ['d', 'Right']:
+    elif key == 'd':
         app.player.cx += app.player.movementSpeed
     checkIfChangeOfRoom(app)
     inBoundsOfRoom(app)
@@ -63,13 +81,11 @@ def movePlayerAttacks(app):
             app.currentRoom.playerAttacks.remove(attack)
         #check if inBoundsOfMonsters:
         for monster in app.currentRoom.monsters:
-            if attackInBoundsOfMonster(attack[0], attack[1], attack[2], 
-                                       monster.cx, monster.cy, monster.width): 
-                app.currentRoom.playerAttacks.remove(attack)                
-                monster.health -= 1
+            if monster.attackInBoundsOfMonster(attack[0], attack[1], attack[2]):
+                if attack in app.currentRoom.playerAttacks:
+                    app.currentRoom.playerAttacks.remove(attack)                
+                    monster.health -= 1
                 if monster.health == 0:
                     app.currentRoom.monsters.remove(monster)
 
-def f(x):
-    print('yes')
 

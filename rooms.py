@@ -20,6 +20,10 @@ class Room(object):
     def __eq__(self, other):
         return (isinstance(other, Room) and (self.cell == other.cell and self.hasPlayer == other.hasPlayer))
 
+    ##############
+    #Room Methods
+    ##############
+
     # https://youtu.be/tUskxXXTh7s?t=59
     #This function was influenced by the video above.
     #The idea of taking a grid placing a cell in the middle then putting 
@@ -44,15 +48,46 @@ class Room(object):
             Room.selectionRooms.remove(randomRoom)
         return Room.rooms
 
-    def generateMonster(self, appWidth, appHeight):
+    @staticmethod
+    def createRoomPixelList(canvasWidth, canvasHeight):
+        rows = canvasWidth // 40
+        cols = canvasHeight // 40
+        result = []
+        for row in range(rows):
+            for col in range(cols):
+                result.append(((row * 40), (col * 40)))
+        return result
+
+    #interval for using a the pixel graph is 10
+    #interval for using cells is 1
+    @staticmethod
+    def createAdjacencyList(L, interval):
+        def isConnected(x0, y0, x1, y1, interval):
+            return ((abs(x0 - x1) == 0 and abs(y0 - y1) == interval) or 
+            (abs(x0 - x1) == interval and abs(y0 - y1) == 0))
+
+        graph = dict()
+        for nodeRow, nodeCol in L:
+            graph[(nodeRow, nodeCol)] = set()
+            for edgeRow, edgeCol in L:
+                if (nodeRow, nodeCol) != (edgeRow, edgeCol):
+                    if isConnected(nodeRow, nodeCol, edgeRow, edgeCol, interval):
+                        graph[(nodeRow, nodeCol)].add((edgeRow, edgeCol))        
+        return graph
+
+
+    def generateMonster(self, graph, appWidth, appHeight):
         cx = random.randint(20, appWidth - 20)
-        while cx % 10 != 0:
-            cx = random.randint(20, appWidth - 20)
         cy = random.randint(20, appHeight - 20)
-        while cy % 10 != 0:
+        while (cx, cy) not in graph:
+            cx = random.randint(20, appWidth - 20)
             cy = random.randint(20, appHeight - 20)
         monster = Monster(cx, cy)
         self.monsters.append(monster)
+  
+################
+#Functions
+################
 
 def checkIfChangeOfRoom(app):
     #checks if all monsters in the room are dead
@@ -73,6 +108,7 @@ def checkIfChangeOfRoom(app):
         elif inBoundsOfDoor(app, 'bottom') and checkIfAdjacentRoom(app, (+1,0)):
             newRoomCell = (app.currentRoom.cell[0] + (+1), app.currentRoom.cell[1] + (0))
             changeRoom(app, newRoomCell, (+1,0))
+
 
 def inBoundsOfRoom(app):
     player = app.player

@@ -9,8 +9,9 @@ import random, time
 #Main App
 #############
 
-
 def appStarted(app):
+    app.graph = Room.createAdjacencyList(Room.createRoomPixelList(app.width, app.height), 40)
+    # print(Room.createRoomPixelList(app.width, app.height))
     app.rooms = Room.generateRooms(Room)
     for room in app.rooms:
         if room.hasPlayer:
@@ -20,7 +21,7 @@ def appStarted(app):
     for room in app.rooms:
         if room.cell != (5,5):
             for i in range(random.randint(1,5)):
-                room.generateMonster(app.width, app.height)
+                room.generateMonster(app.graph, app.width, app.height)
     app.doorWidth = 40
     app.doors = {
         'top':[app.width//2 - app.doorWidth, 0, app.width//2 + app.doorWidth, app.doorWidth//3], 
@@ -34,15 +35,14 @@ def appStarted(app):
     app.totalKeyPressedTimer = None
     app.lastKeyPressed = None
     ##################
+    app.monsterMovementTimer = 0
     print(app.currentRoom)
     
 def mousePressed(app, event):
-    app.currentRoom.playerAttacks.append(app.player.attack(event.x, event.y))
+    # app.player.attackWithMouse(app, event.x, event.y)
+    pass
 
 def keyPressed(app, event):
-    print(app.player.cx, app.player.cy)
-    for monster in app.currentRoom.monsters:
-        print('   ', monster.cx, monster.cy)
     ###################
     app.keyPressedTimer = time.time()
     app.totalKeyPressedTimer = time.time()
@@ -53,6 +53,8 @@ def keyPressed(app, event):
         Room.selectionRooms = []
         appStarted(app)
     playerMovement(app, event.key)
+    app.player.attackWithKeys(app, event.key)
+    
 
 def keyReleased(app, event):
     app.keyPressedTimer = None
@@ -68,12 +70,19 @@ def timerFired(app):
     if app.totalKeyPressedTimer != None and time.time() - app.totalKeyPressedTimer >= 0.5: 
         app.keyPressedTimer = None
         app.totalKeyPressedTimer = None
-    ##################
+    # ##################
     if len(app.currentRoom.playerAttacks) > 0:
         movePlayerAttacks(app)
     if app.player.health <= 0:
         app.gameOver = True
-    monsterAttack(app)
+    app.monsterMovementTimer += 1
+
+    for monster in app.currentRoom.monsters:
+        if len(app.currentRoom.monsters) == 0: return 
+        monster.inBoundsOfMonster(app)
+        if app.monsterMovementTimer % 8 == 0:
+            monster.attackPlayer(app)
+
 
 def redrawAll(app, canvas):
     if app.gameOver:
@@ -103,11 +112,12 @@ def drawPlayerAttacks(app, canvas):
 
 def drawRoom(app, canvas):
     canvas.create_rectangle(0, 0, app.width, app.height, fill='light grey')
-    
+   
 #make doors resizable to the window in the future
 def drawDoors(app, canvas):
     dirs = [(0,-1),(0,+1),(-1,0),(+1,0)]
-    color = 'dark grey'
+    if len(app.currentRoom.monsters) != 0: color = 'dim gray'
+    else: color = 'dark grey'
     for drow, dcol in dirs:
         if checkIfAdjacentRoom(app, (drow,dcol)):
             if drow == -1: #top door
