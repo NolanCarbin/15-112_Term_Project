@@ -11,6 +11,7 @@ class Room(object):
         self.cell = cell
         self.hasPlayer = False
         self.isBossRoom = False
+        self.bossRoomDoorWidth = 30
         self.player = None
         self.playerAttacks = []
         self.monsters = [] 

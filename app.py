@@ -12,12 +12,13 @@ def appStarted(app):
     app.graph = Room.createAdjacencyList(Room.createRoomPixelList(app.width, app.height), 40)
     app.rooms = Room.generateRooms(Room)
     app.roomGraph = Room.createAdjacencyList(Room.createRoomList(), 1)
+    #sets up player:
     for room in app.rooms:
         if room.hasPlayer:
             app.player = room.player = Player(app.width, app.height)
             app.currentRoom = room
-    #for some reason I had to make two loops, instead of putting this check in the above loop. It would create two instances of the starting Room, one with 0 monsters, and the other with 1 monster.
     farthestRoomCell = Room.findFarthestRoom(app.roomGraph, app.currentRoom.cell)
+    #sets up monsters and boss:
     for room in app.rooms:
         if room.cell == farthestRoomCell:
             app.bossRoom = room
@@ -42,12 +43,11 @@ def appStarted(app):
     ##################
     app.monsterMovementTimer = 0
     app.monsterAttackTimer = 0
+    app.bossAttackTimer = 0
     print(app.currentRoom)
     
 def mousePressed(app, event):
-    # app.player.attackWithMouse(app, event.x, event.y)
-    print(app.bossRoom)
-    pass
+    app.player.attackWithMouse(app, event.x, event.y)
 
 def keyPressed(app, event):
     #Used for the os delay:
@@ -69,7 +69,6 @@ def keyPressed(app, event):
         app.currentRoom.hasPlayer = True
         app.currentRoom.player = app.player
 
-
 def keyReleased(app, event):
     app.keyPressedTimer = None
     app.totalKeyPressedTimer = None
@@ -88,30 +87,39 @@ def timerFired(app):
     # ##################
     if len(app.currentRoom.playerAttacks) > 0:
         movePlayerAttacks(app)
-    if app.currentRoom == app.bossRoom:
-        for boss in app.currentRoom.monsters:
-            boss.attackPlayer(app)
+    if len(app.currentRoom.bossAttacks) > 0:
+        BossMonster.moveBossAttacks(app)
+    ###################
     if app.player.health <= 0:
         app.gameOver = True
+    ###################
     app.monsterMovementTimer += 1
     app.monsterAttackTimer += 1
-
+    app.bossAttackTimer += 1
     for monster in app.currentRoom.monsters:
         if len(app.currentRoom.monsters) == 0: return 
         if app.monsterMovementTimer % monster.movementSpeed == 0:
             monster.moveTowardPlayer(app)
         if app.monsterMovementTimer % monster.attackSpeed == 0:
             monster.inBoundsOfPlayer(app)
+        if app.currentRoom == app.bossRoom:
+            if app.bossAttackTimer % monster.shootingSpeed == 0:
+                monster.attackPlayer(app)
+    ###################
+    # if len(app.bossRoom.monsters) == 0 and if app.player is in bounds of door)
+    ###################
 
 def redrawAll(app, canvas):
     if app.gameOver:
         drawGameOver(app, canvas)
     else:
         drawRoom(app, canvas)
+        drawDoorToNextFloor(app, canvas)
         drawPlayer(app, canvas)
         drawDoors(app, canvas)
         drawPlayerAttacks(app, canvas)
         drawMonsters(app, canvas)
+        drawBossAttacks(app, canvas)
         drawPlayerHealth(app, canvas)
 
 
@@ -125,10 +133,17 @@ def drawPlayer(app, canvas):
 
 def drawPlayerAttacks(app, canvas):
     for attack in app.currentRoom.playerAttacks:
-        cx = attack[0]
-        cy = attack[1]
-        r = attack[2]
+        cx = attack['cx']
+        cy = attack['cy']
+        r = attack['radius']
         canvas.create_oval(cx - r, cy - r, cx + r, cy + r, fill='firebrick1')
+
+def drawBossAttacks(app, canvas):
+    for attack in app.currentRoom.bossAttacks:
+        cx = attack['cx']
+        cy = attack['cy']
+        r = attack['radius']
+        canvas.create_oval(cx - r, cy - r, cx + r, cy + r, fill='blue')
 
 def drawRoom(app, canvas):
     if app.currentRoom == app.bossRoom and app.currentRoom.hasPlayer:
@@ -165,6 +180,12 @@ def drawPlayerHealth(app, canvas):
     cellWidth = healthBarWidth / (6 * 2) #app.player.health * 2(because monsters hit 0.5)
     for i in range(app.player.health):
         canvas.create_rectangle(i * cellWidth + 41, 21, (i * cellWidth + 41) + cellWidth, 39, fill='red', width=0)
+
+def drawDoorToNextFloor(app, canvas):
+    if len(app.bossRoom.monsters) == 0 and app.currentRoom == app.bossRoom:
+        doorWidth = 30
+        canvas.create_rectangle(app.width//2 - doorWidth, app.height//2 - doorWidth,
+            app.width//2 + doorWidth, app.height//2 + doorWidth, fill='black')
 
 def drawGameOver(app, canvas):
     canvas.create_rectangle(0,0,app.width, app.height, fill='black')

@@ -7,9 +7,9 @@ class Monster(object):
         self.cx = cx
         self.cy = cy
         self.movementSpeed = 8
+        #physical attack speed
         self.attackSpeed = 4
-
-        self.health = 5
+        self.health = 6
 
     def __repr__(self):
         return f'Monster(Location:{(self.cx, self.cy)}, Health:{self.health})'
@@ -93,9 +93,34 @@ class BossMonster(Monster):
     def __init__(self, cx, cy):
         super().__init__(cx, cy)
         self.width = 40
-        self.movementSpeed = 12
+        #movementSpeed is inverted, lower == faster
+        self.movementSpeed = 10
+        #physical attack speed:
         self.attackSpeed = 2
-        self.health = 20
+        #inverted lower == faster
+        self.shootingSpeed = 10
+        self.health = 25
 
     def attackPlayer(self, app):
-        pass
+        cx = self.cx
+        cy = self.cy
+        radius = 8
+        deltaX = (app.player.cx - cx) / self.shootingSpeed
+        deltaY = (app.player.cy - cy) / self.shootingSpeed
+        app.currentRoom.bossAttacks.append({'cx': cx, 'cy': cy, 'radius': radius, 'deltaX': deltaX, 'deltaY':deltaY})
+
+    @staticmethod
+    def moveBossAttacks(app):
+        for attack in app.currentRoom.bossAttacks: 
+            attack['cx'] = attack['cx'] + attack['deltaX']
+            attack['cy'] = attack['cy'] + attack['deltaY']
+            #check if not inBoundsOfRoom:
+            if (attack['cx'] < 0 or attack['cx'] > app.width or 
+                attack['cy'] < 0 or attack['cy'] > app.height): 
+                app.currentRoom.bossAttacks.remove(attack)
+            #check if inBoundsOfPlayer:
+            if app.player.attackInBoundsOfPlayer(attack['cx'], attack['cy'], attack['radius']):
+                if attack in app.currentRoom.bossAttacks:
+                    app.currentRoom.bossAttacks.remove(attack)                
+                    app.player.health -= 1
+                

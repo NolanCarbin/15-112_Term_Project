@@ -16,30 +16,11 @@ class Player(object):
     def attackWithMouse(self, app, x, y):
         radius = 8
         cx, cy = self.cx, self.cy
-        deltaX, deltaY = self.findAttackDeltas(x, y, cx, cy)
-        app.currentRoom.playerAttacks.append([cx, cy, radius, deltaX, deltaY])
+        deltaX = (x - cx) / self.attackSpeed
+        deltaY = (y - cy) / self.attackSpeed
+        app.currentRoom.playerAttacks.append({'cx': cx, 'cy': cy, 'radius': radius, 'deltaX': deltaX, 'deltaY':deltaY})
 
-#The math for this is not right, needs to be fixed
-    def findAttackDeltas(self, x, y, cx, cy):
-        deltaX = 0
-        deltaY = 0
-        #right:
-        if x >= cx and x >= abs(y):
-            deltaX = self.attackSpeed
-        #left
-        elif x <= cx and y >= x:
-            deltaX = -self.attackSpeed
-        #Up
-        elif y <= cy and x >= abs(y):
-            deltaY = -self.attackSpeed
-        #Down
-        elif y >= cy and y >= abs(x):
-            deltaY = self.attackSpeed
-        else: 
-            return 
-        return (deltaX, deltaY)
-
-    def attackWithKeys(self,app, key):
+    def attackWithKeys(self, app, key):
         if key not in ['Right', 'Left', 'Up', 'Down']: return 
         radius = 8
         cx, cy = self.cx, self.cy
@@ -53,7 +34,21 @@ class Player(object):
             deltaY = -self.attackSpeed
         elif key == 'Down':
             deltaY = self.attackSpeed
-        app.currentRoom.playerAttacks.append([cx, cy, radius, deltaX, deltaY])
+        app.currentRoom.playerAttacks.append({'cx': cx, 'cy': cy, 'radius': radius, 'deltaX': deltaX, 'deltaY':deltaY})
+
+    #taken from: https://www.geeksforgeeks.org/check-if-any-point-overlaps-the-given-circle-and-rectangle/
+    #modified to be a method and fit the needs of my app
+    def attackInBoundsOfPlayer(self, circleX, circleY, r): 
+        x1, y1 = self.cx - self.width, self.cy - self.width
+        x2, y2 = self.cx + self.width, self.cy + self.width
+        #(xn, yn) is the nearest point 
+        xn = max(x1, min(circleX, x2))
+        yn = max(y1, min(circleY, y2))
+        #(dx, dy) is the distance between the nearest point and the center of 
+        #the circle
+        dx = xn - circleX
+        dy = yn - circleY
+        return (dx**2 + dy**2) <= r**2
 
 def playerMovement(app, key):
     if key == 'w':
@@ -69,19 +64,15 @@ def playerMovement(app, key):
 
 def movePlayerAttacks(app):
     for attack in app.currentRoom.playerAttacks: 
-        deltaX = attack[3]
-        deltaY = attack[4]
-        #circle x:
-        attack[0] += deltaX
-        #circle y:
-        attack[1] += deltaY
+        attack['cx'] = attack['cx'] + attack['deltaX']
+        attack['cy'] = attack['cy'] + attack['deltaY']
         #check if not inBoundsOfRoom:
-        if (attack[0] < 0 or attack[0] > app.width or 
-            attack[1] < 0 or attack[1] > app.height): 
+        if (attack['cx'] < 0 or attack['cx'] > app.width or 
+            attack['cy'] < 0 or attack['cy'] > app.height): 
             app.currentRoom.playerAttacks.remove(attack)
         #check if inBoundsOfMonsters:
         for monster in app.currentRoom.monsters:
-            if monster.attackInBoundsOfMonster(attack[0], attack[1], attack[2]):
+            if monster.attackInBoundsOfMonster(attack['cx'], attack['cy'], attack['radius']):
                 if attack in app.currentRoom.playerAttacks:
                     app.currentRoom.playerAttacks.remove(attack)                
                     monster.health -= 1
