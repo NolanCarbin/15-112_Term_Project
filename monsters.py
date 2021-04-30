@@ -6,7 +6,9 @@ class Monster(object):
         self.width = 20
         self.cx = cx
         self.cy = cy
-        self.speed = 10
+        self.movementSpeed = 8
+        self.attackSpeed = 4
+
         self.health = 5
 
     def __repr__(self):
@@ -20,7 +22,9 @@ class Monster(object):
     # https://www.redblobgames.com/pathfinding/a-star/introduction.html
     #findPlayer() uses BFS to tell if there is a path from the monster to the 
     #player, and path() returns the path from the current cell of the monster 
-    #to the cell nearest to the player.
+    #to the cell nearest to the player. I interpreted the code from the site, 
+    #and used it to fit my needs. Instead checking if the currentNode == goalNode
+    #I made it check if the currentNode(monster's cell) was in the bounds of the the player's cell.
 
     @staticmethod
     def path(goalCell, cameFrom, startingCell):
@@ -29,7 +33,6 @@ class Monster(object):
         while current != startingCell:
             endPath.append(current)
             current = cameFrom[current]
-        # endPath.append(startingCell)
         endPath.reverse()
         return endPath
 
@@ -57,19 +60,19 @@ class Monster(object):
                     queue.enqueue(node)
         return None
 
-    def attackPlayer(self, app):
+    def moveTowardPlayer(self, app):
         path = self.findPlayer(app.graph, app.player)
         if len(path) >= 1:
             self.cx = path[0][0]
             self.cy = path[0][1]
         
     
-    def inBoundsOfMonster(self, app):
+    def inBoundsOfPlayer(self, app):
         if (app.player.cx - app.player.width <= self.cx + self.width and 
             app.player.cx + app.player.width >= self.cx - self.width and 
             app.player.cy - app.player.width <= self.cy + self.width and 
             app.player.cy + app.player.width >= self.cy - self.width):    
-                app.player.health -= 0.5
+                app.player.health -= 1
 
     #taken from: https://www.geeksforgeeks.org/check-if-any-point-overlaps-the-given-circle-and-rectangle/
     #modified to be a method and fit the needs of my app
@@ -84,3 +87,15 @@ class Monster(object):
         dx = xn - circleX
         dy = yn - circleY
         return (dx**2 + dy**2) <= r**2
+
+
+class BossMonster(Monster):
+    def __init__(self, cx, cy):
+        super().__init__(cx, cy)
+        self.width = 40
+        self.movementSpeed = 12
+        self.attackSpeed = 2
+        self.health = 20
+
+    def attackPlayer(self, app):
+        pass

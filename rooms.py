@@ -10,15 +10,17 @@ class Room(object):
     def __init__(self, cell):
         self.cell = cell
         self.hasPlayer = False
+        self.isBossRoom = False
         self.player = None
         self.playerAttacks = []
-        self.monsters = []
+        self.monsters = [] 
+        self.bossAttacks = []
 
     def __repr__(self):
-        return f'Room({self.cell}, HasPlayer:{self.hasPlayer}, Player:{self.player}, Monsters:{len(self.monsters)})'
+        return f'Room({self.cell}, HasPlayer:{self.hasPlayer}, isBossRoom:{self.isBossRoom}, Player:{self.player}, Monsters:{len(self.monsters)})'
 
     def __eq__(self, other):
-        return (isinstance(other, Room) and (self.cell == other.cell and self.hasPlayer == other.hasPlayer))
+        return (isinstance(other, Room) and (self.cell == other.cell))
 
     ##############
     #Room Methods
@@ -30,7 +32,7 @@ class Room(object):
     #all adjacent cells into a list and then randomly selecting from that list 
     #of adjacent cells to use as the next room, and then repeating until there is 
     #a list that is the size of the number of rooms that you want was taken from
-    #this video. No code was taken from the video only concepts. 
+    #this video. No code was taken from the video, only concepts. 
     def generateRooms(self):
         startingRoom = Room((Room.rows//2, Room.cols//2))
         startingRoom.hasPlayer = True
@@ -48,6 +50,24 @@ class Room(object):
             Room.selectionRooms.remove(randomRoom)
         return Room.rooms
 
+    def generateMonster(self, graph, appWidth, appHeight):
+        cx = random.randint(20, appWidth - 20)
+        cy = random.randint(20, appHeight - 20)
+        while (cx, cy) not in graph:
+            cx = random.randint(20, appWidth - 20)
+            cy = random.randint(20, appHeight - 20)
+        monster = Monster(cx, cy)
+        self.monsters.append(monster)
+
+    def generateBoss(self, graph, appWidth, appHeight):
+        cx = random.randint(20, appWidth - 20)
+        cy = random.randint(20, appHeight - 20)
+        while (cx, cy) not in graph:
+            cx = random.randint(20, appWidth - 20)
+            cy = random.randint(20, appHeight - 20)
+        boss = BossMonster(cx, cy)
+        self.monsters.append(boss)
+
     @staticmethod
     def createRoomPixelList(canvasWidth, canvasHeight):
         rows = canvasWidth // 40
@@ -58,14 +78,13 @@ class Room(object):
                 result.append(((row * 40), (col * 40)))
         return result
 
-    #interval for using a the pixel graph is 10
-    #interval for using cells is 1
+    #interval for using a the pixel graph is 40
+    #interval for using room cells is 1
     @staticmethod
     def createAdjacencyList(L, interval):
         def isConnected(x0, y0, x1, y1, interval):
             return ((abs(x0 - x1) == 0 and abs(y0 - y1) == interval) or 
-            (abs(x0 - x1) == interval and abs(y0 - y1) == 0))
-
+                    (abs(x0 - x1) == interval and abs(y0 - y1) == 0))
         graph = dict()
         for nodeRow, nodeCol in L:
             graph[(nodeRow, nodeCol)] = set()
@@ -75,16 +94,33 @@ class Room(object):
                         graph[(nodeRow, nodeCol)].add((edgeRow, edgeCol))        
         return graph
 
+    @staticmethod
+    def createRoomList():
+        roomCellList = []
+        for room in Room.rooms:
+            roomCellList.append(room.cell)
+        return roomCellList
 
-    def generateMonster(self, graph, appWidth, appHeight):
-        cx = random.randint(20, appWidth - 20)
-        cy = random.randint(20, appHeight - 20)
-        while (cx, cy) not in graph:
-            cx = random.randint(20, appWidth - 20)
-            cy = random.randint(20, appHeight - 20)
-        monster = Monster(cx, cy)
-        self.monsters.append(monster)
-  
+    #findFarthestRoom() uses BFS to search every path in the app.rooms list
+    #it returns the last cell that the algorithm reaches. Which is the farthest 
+    #cell from the startingCell. The BFS algorithm is taken from this site:
+    #https://www.redblobgames.com/pathfinding/a-star/introduction.html
+
+    @staticmethod
+    def findFarthestRoom(graph, startingCell):
+        queue = Queue()
+        reached = set()
+        queue.enqueue(startingCell) 
+        reached.add(startingCell)
+        while queue.len() != 0:
+            currentNode = queue.dequeue()
+            for nextNode in graph[currentNode]:
+                if nextNode not in reached:
+                    queue.enqueue(nextNode)
+                    reached.add(currentNode) 
+            if queue.len() == 1:
+                return (queue.queue[0])
+
 ################
 #Functions
 ################

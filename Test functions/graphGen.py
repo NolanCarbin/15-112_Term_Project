@@ -12,6 +12,9 @@ result = {
 #interval for using a the pixel graph is 10
 #interval for using cells is 1
 def createAdjacencyList(L, interval):
+    def isConnected(x0, y0, x1, y1, interval):
+        return ((abs(x0 - x1) == 0 and abs(y0 - y1) == interval) or 
+                (abs(x0 - x1) == interval and abs(y0 - y1) == 0))
     graph = dict()
     for nodeRow, nodeCol in L:
         graph[(nodeRow, nodeCol)] = set()
@@ -21,36 +24,15 @@ def createAdjacencyList(L, interval):
                     graph[(nodeRow, nodeCol)].add((edgeRow, edgeCol))        
     return graph
 
-def isConnected(x0, y0, x1, y1, interval):
-    return ((abs(x0 - x1) == 0 and abs(y0 - y1) == interval) or 
-    (abs(x0 - x1) == interval and abs(y0 - y1) == 0))
-
-# print(createAdjacencyList(L))
-
-
-#Use BFS to find the farthest cell from starting cell
-
-#root will equal starting room/cell(5,5)
-#create a queue
-#what is the goal?
-#   calculate the farthest room cell
-#   the cell with the most amount of nodes inbetween
-def findFarthestRoom(graph, root):
-    pass
-
-
-L = [(10, 10), (10, 20), (10, 30)]
 
 def createRoomPixelList(canvasWidth, canvasHeight):
-    rows = canvasHeight // 10
-    cols = canvasWidth // 10
+    rows = canvasWidth // 40
+    cols = canvasHeight // 40
     result = []
-    for row in range(rows + 1):
-        for col in range(cols + 1):
-            result.append((row * 10, col * 10))
+    for row in range(rows):
+        for col in range(cols):
+            result.append(((row * 40), (col * 40)))
     return result
-
-print(createRoomPixelList(50,50))
 
 
 class Queue(object):
@@ -71,49 +53,43 @@ class Queue(object):
     def len(self):
         return len(self.queue)
 
+graph = createAdjacencyList(createRoomPixelList(400, 500), 40)
+startingCell = (240, 80)
+goalCell = (100, 200)
 
+def path(goalCell, cameFrom, startingCell):
+    current = goalCell
+    endPath = []
+    while current != startingCell:
+        endPath.append(current)
+        current = cameFrom[current]
+    # endPath.append(startingCell)
+    endPath.reverse()
+    return endPath
 
-graph = createAdjacencyList(createRoomPixelList(100, 100), 10)
-startingCell = (10, 50)
-goalCell = (20, 20)
-
-
-def bfs1(graph, startingCell, goalCell):
-    queue = Queue()
-    visited = set()
-    queue.enqueue(startingCell) 
-    visited.add(startingCell)
-    while queue.len() != 0:
-        currentNode = queue.dequeue()
-        for node in graph[currentNode]:
-            if node not in visited:
-                visited.add(node)
-                if node == goalCell: return node
-                queue.enqueue(node)
-    return None
-
-def bfs2(graph, startingCell, goalCell):
+def findPlayer(cx, cy, graph, player):
+    def inBounds(currentNode, player):
+        nodeX, nodeY = currentNode
+        if (player.cx - player.width <= nodeX + player.width and 
+        player.cx + player.width >= nodeX - player.width and 
+        player.cy - player.width <= nodeY + player.width and 
+        player.cy + player.width >= nodeY - player.width):
+            return True
+        return False
+    startingCell = (cx, cy)
     queue = Queue()
     cameFrom = dict()
     queue.enqueue(startingCell) 
     cameFrom[startingCell] = None
     while queue.len() != 0:
         currentNode = queue.dequeue()
-        if currentNode == goalCell: return path(goalCell, cameFrom, startingCell)
+        if inBounds(currentNode, player): 
+            return path(currentNode, cameFrom, startingCell)
         for node in graph[currentNode]:
             if node not in cameFrom:
                 cameFrom[node] = currentNode
                 queue.enqueue(node)
     return None
 
-def path(goal, cameFrom, start):
-    current = goal
-    endPath = []
-    while current != start:
-        endPath.append(current)
-        current = cameFrom[current]
-    endPath.append(start)
-    endPath.reverse()
-    return endPath
 
-print(bfs2(graph, startingCell, goalCell))
+print(findPlayer(graph, startingCell, goalCell))

@@ -7,7 +7,7 @@ class Player(object):
         self.cy = appHeight//2
         self.movementSpeed = 10
         self.width = 20
-        self.health = 6
+        self.health = 12
         self.attackSpeed = 15
     
     def __repr__(self):
