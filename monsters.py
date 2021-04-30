@@ -15,6 +15,12 @@ class Monster(object):
     #################
     #Monster Methods
     #################
+    
+    #path() and findPlayer() are taken from: 
+    # https://www.redblobgames.com/pathfinding/a-star/introduction.html
+    #findPlayer() uses BFS to tell if there is a path from the monster to the 
+    #player, and path() returns the path from the current cell of the monster 
+    #to the cell nearest to the player.
 
     @staticmethod
     def path(goalCell, cameFrom, startingCell):
@@ -65,27 +71,16 @@ class Monster(object):
             app.player.cy + app.player.width >= self.cy - self.width):    
                 app.player.health -= 0.5
 
-    #taken from: http://www.jeffreythompson.org/collision-detection/circle-rect.php 
-    #converted from another language to python 
-    def attackInBoundsOfMonster(self, circleX, circleY, r):
-        testX = circleX
-        testY = circleY
-        if (circleX < self.cx):        
-            testX = self.cx
-        elif (circleX > self.cx + self.width):
-            testX = self.cx + self.width
-        if (circleY < self.cy):
-            testY = self.cy
-        elif (circleY > self.cy + self.width):
-            testY = self.cy + self.width
-    #get distance from closest edges
-        distX = circleX - testX
-        distY = circleY - testY
-        distance = math.sqrt((distX * distX) + (distY * distY))
-    #if the distance is less than the radius, then collision
-        if (distance <= r):
-            return True
-        return False
-
-
-
+    #taken from: https://www.geeksforgeeks.org/check-if-any-point-overlaps-the-given-circle-and-rectangle/
+    #modified to be a method and fit the needs of my app
+    def attackInBoundsOfMonster(self, circleX, circleY, r): 
+        x1, y1 = self.cx - self.width, self.cy - self.width
+        x2, y2 = self.cx + self.width, self.cy + self.width
+        #(xn, yn) is the nearest point 
+        xn = max(x1, min(circleX, x2))
+        yn = max(y1, min(circleY, y2))
+        #(dx, dy) is the distance between the nearest point and the center of 
+        #the circle
+        dx = xn - circleX
+        dy = yn - circleY
+        return (dx**2 + dy**2) <= r**2
