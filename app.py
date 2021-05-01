@@ -110,6 +110,7 @@ def timerFired(app):
     if app.player.health <= 0:
         app.gameOver = True
     ###################
+    #Monster/Boss movement and attack speeds
     app.monsterMovementTimer += 1
     app.monsterAttackTimer += 1
     app.bossAttackTimer += 1
@@ -135,7 +136,7 @@ def timerFired(app):
     app.skeleton.incrementRunningCounter()
     app.boss.incrementRunningCounter()
 
-    #Flipping monster's sprites:
+    #Flips monster's sprites:
     if app.player.cx < app.width//2 and not app.skeleton.flipped: 
         app.skeleton.flipSpriteSheet(app.skeleton.runningSprites)
         app.skeleton.flipped = True
@@ -160,6 +161,7 @@ def redrawAll(app, canvas):
         drawMonsters(app, canvas)
         drawBossAttacks(app, canvas)
         drawPlayerHealth(app, canvas)
+        drawMonstersHealth(app, canvas)
 
 
 #####################
@@ -236,15 +238,29 @@ def drawMonsters(app, canvas):
             sprite = app.skeleton.runningSprites[app.skeleton.runningCounter]
             canvas.create_image(monster.cx, monster.cy, image=ImageTk.PhotoImage(sprite))
     
-        
-
 def drawPlayerHealth(app, canvas):
     x0,y0,x1,y1 = 40,20,202,40
     canvas.create_rectangle(x0,y0,x1,y1, fill='white', width=2)
     healthBarWidth = 160
-    cellWidth = healthBarWidth / (6 * 2) #app.player.health * 2(because monsters hit 0.5)
+    cellWidth = healthBarWidth / (12) #app.player.health * 2(because monsters hit 0.5)
     for i in range(app.player.health):
         canvas.create_rectangle(i * cellWidth + 41, 21, (i * cellWidth + 41) + cellWidth, 39, fill='red', width=0)
+
+def drawMonstersHealth(app, canvas):
+    for monster in app.currentRoom.monsters:
+        if app.currentRoom == app.bossRoom:
+            monsterHealth = 25
+        else:
+            monsterHealth = 6
+        x0 = monster.cx - monster.width - 3
+        y0 = monster.cy - monster.width - 18
+        x1 = monster.cx + monster.width + 3
+        y1 = monster.cy - monster.width - 15
+        canvas.create_rectangle(x0, y0, x1, y1, fill='white')
+        healthBarWidth = (monster.cx + monster.width + 3) - (monster.cx - monster.width - 3)
+        cellWidth = healthBarWidth / monsterHealth
+        for i in range(monster.health):
+            canvas.create_rectangle(i * cellWidth + x0, y0, (i * cellWidth + x0) + cellWidth, y1, fill='red', width=0)
 
 def drawDoorToNextFloor(app, canvas):
     if len(app.bossRoom.monsters) == 0 and app.currentRoom == app.bossRoom:
