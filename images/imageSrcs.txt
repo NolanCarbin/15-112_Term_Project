@@ -1,0 +1,8 @@
+wizard spritestrip:
+https://luizmelo.itch.io/wizard-pack
+
+skeleton spritestrip:
+https://jesse-m.itch.io/skeleton-pack
+
+cyclops spritestrip:
+https://elthen.itch.io/2d-pixel-art-cyclops-sprites?download

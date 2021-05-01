@@ -46,12 +46,19 @@ def appStarted(app):
     app.monsterAttackTimer = 0
     app.bossAttackTimer = 0
     ##################
-    app.wizard = Spritesheet(app, 'images/wizardSpritesheet.png')
-    app.skeleton = Spritesheet(app, 'images/skeletonSpritesheet.png')
+    #Sprites:
+    app.wizard = PlayerSpritesheet(app, 'images/wizardSpritesheet.png')
     app.wizard.scaleImage(app, .7)
     app.wizard.initializeIdleSpriteList()
     app.wizard.initializeRunningSpriteList()
     app.wizard.initializeAttackSpriteList()
+    app.skeleton = MonsterSpritesheet(app, 'images/skeletonSpritesheet.png')
+    app.skeleton.scaleImage(app, 1.7)
+    app.skeleton.initializeRunningSpriteList(1.7)
+    app.boss = BossSpritesheet(app, 'images/cyclopsspritesheet.png')
+    app.boss.scaleImage(app, 3)
+    app.boss.initializeRunningSpriteList(3)
+
     ##################
     print(app.currentRoom)
     
@@ -118,12 +125,27 @@ def timerFired(app):
     ###################
     # if len(app.bossRoom.monsters) == 0 and if app.player is in bounds of door)
     ###################
+    #Sprites:
     if app.wizard.attacking:
         app.wizard.incrementAttackingCounter()
     elif app.wizard.isRunning:
         app.wizard.incrementRunningCounter()
     else:
         app.wizard.incrementIdleCounter()
+    app.skeleton.incrementRunningCounter()
+    app.boss.incrementRunningCounter()
+
+    #Flipping monster's sprites:
+    if app.player.cx < app.width//2 and not app.skeleton.flipped: 
+        app.skeleton.flipSpriteSheet(app.skeleton.runningSprites)
+        app.skeleton.flipped = True
+        app.boss.flipSpriteSheet(app.boss.runningSprites)
+        app.boss.flipped =True
+    elif app.player.cx >= app.width//2 and app.skeleton.flipped:
+        app.skeleton.flipSpriteSheet(app.skeleton.runningSprites)
+        app.skeleton.flipped = False
+        app.boss.flipSpriteSheet(app.boss.runningSprites)
+        app.boss.flipped = False
     ###################
 
 def redrawAll(app, canvas):
@@ -144,9 +166,11 @@ def redrawAll(app, canvas):
 #Drawing Functions
 #####################
 def drawPlayer(app, canvas):
+    #HitBox:
     # canvas.create_rectangle(app.player.cx - app.player.width, 
     #     app.player.cy - app.player.width, app.player.cx + app.player.width, 
     #     app.player.cy + app.player.width, fill='medium purple')
+    #Sprite:
     if app.wizard.attacking:
         sprite = app.wizard.attackSprites[app.wizard.attackingCounter]
     elif app.wizard.isRunning:
@@ -163,11 +187,12 @@ def drawPlayerAttacks(app, canvas):
         canvas.create_oval(cx - r, cy - r, cx + r, cy + r, fill='white')
 
 def drawBossAttacks(app, canvas):
+    color = 'firebrick2'
     for attack in app.currentRoom.bossAttacks:
         cx = attack['cx']
         cy = attack['cy']
         r = attack['radius']
-        canvas.create_oval(cx - r, cy - r, cx + r, cy + r, fill='blue')
+        canvas.create_oval(cx - r, cy - r, cx + r, cy + r, fill=color)
 
 def drawRoom(app, canvas):
     if app.currentRoom == app.bossRoom and app.currentRoom.hasPlayer:
@@ -194,8 +219,24 @@ def drawDoors(app, canvas):
 
 def drawMonsters(app, canvas):
     for monster in app.currentRoom.monsters:
-        canvas.create_rectangle(monster.cx - monster.width,
-            monster.cy - monster.width, monster.cx + monster.width, monster.cy + monster.width, fill='green')
+        if app.currentRoom.isBossRoom:
+            #Hitbox
+            # canvas.create_rectangle(monster.cx - monster.width, 
+            #         monster.cy - monster.width, monster.cx + monster.width,
+            #         monster.cy + monster.width, fill='green')
+            #Sprite
+            sprite = app.boss.runningSprites[app.boss.runningCounter]
+            canvas.create_image(monster.cx, monster.cy, image=ImageTk.PhotoImage(sprite))
+            
+        else:
+        #Hitbox:
+            # canvas.create_rectangle(monster.cx - monster.width,
+            # monster.cy - monster.width, monster.cx + monster.width, monster.cy + monster.width, fill='green')
+        #Sprite:
+            sprite = app.skeleton.runningSprites[app.skeleton.runningCounter]
+            canvas.create_image(monster.cx, monster.cy, image=ImageTk.PhotoImage(sprite))
+    
+        
 
 def drawPlayerHealth(app, canvas):
     x0,y0,x1,y1 = 40,20,202,40

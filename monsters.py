@@ -6,8 +6,9 @@ class Monster(object):
         self.width = 20
         self.cx = cx
         self.cy = cy
-        self.movementSpeed = 8
-        #physical attack speed
+        #movementSpeed is inverted, lower == faster
+        self.movementSpeed = 6
+        #physical attack speed:
         self.attackSpeed = 4
         self.health = 6
 
@@ -65,7 +66,6 @@ class Monster(object):
         if len(path) >= 1:
             self.cx = path[0][0]
             self.cy = path[0][1]
-        
     
     def inBoundsOfPlayer(self, app):
         if (app.player.cx - app.player.width <= self.cx + self.width and 
@@ -94,7 +94,7 @@ class BossMonster(Monster):
         super().__init__(cx, cy)
         self.width = 40
         #movementSpeed is inverted, lower == faster
-        self.movementSpeed = 10
+        self.movementSpeed = 8
         #physical attack speed:
         self.attackSpeed = 2
         #inverted lower == faster

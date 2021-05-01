@@ -61,8 +61,10 @@ class Player(object):
 def playerMovement(app, key):
     if key == 'w':
         app.player.cy -= app.player.movementSpeed
+        app.wizard.isRunning = True
     elif key == 's':
         app.player.cy += app.player.movementSpeed
+        app.wizard.isRunning = True
     elif key in {'a', 'Left'}:
         if key == 'a':
             app.player.cx -= app.player.movementSpeed
