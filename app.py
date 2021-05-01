@@ -2,6 +2,7 @@ from cmu_112_graphics import *
 from monsters import *
 from player import * 
 from rooms import *
+from sprites import *
 import random, time
 
 #############
@@ -44,6 +45,14 @@ def appStarted(app):
     app.monsterMovementTimer = 0
     app.monsterAttackTimer = 0
     app.bossAttackTimer = 0
+    ##################
+    app.wizard = Spritesheet(app, 'images/wizardSpritesheet.png')
+    app.skeleton = Spritesheet(app, 'images/skeletonSpritesheet.png')
+    app.wizard.scaleImage(app, .7)
+    app.wizard.initializeIdleSpriteList()
+    app.wizard.initializeRunningSpriteList()
+    app.wizard.initializeAttackSpriteList()
+    ##################
     print(app.currentRoom)
     
 def mousePressed(app, event):
@@ -73,6 +82,7 @@ def keyReleased(app, event):
     app.keyPressedTimer = None
     app.totalKeyPressedTimer = None
     app.lastKeyPressed = None
+    app.wizard.isRunning = False
 
 def timerFired(app):
     #Used for the os delay:
@@ -108,6 +118,13 @@ def timerFired(app):
     ###################
     # if len(app.bossRoom.monsters) == 0 and if app.player is in bounds of door)
     ###################
+    if app.wizard.attacking:
+        app.wizard.incrementAttackingCounter()
+    elif app.wizard.isRunning:
+        app.wizard.incrementRunningCounter()
+    else:
+        app.wizard.incrementIdleCounter()
+    ###################
 
 def redrawAll(app, canvas):
     if app.gameOver:
@@ -127,16 +144,23 @@ def redrawAll(app, canvas):
 #Drawing Functions
 #####################
 def drawPlayer(app, canvas):
-    player = app.player
-    canvas.create_rectangle(player.cx - player.width, 
-    player.cy - player.width, player.cx + player.width, player.cy + player.width, fill='medium purple')
+    # canvas.create_rectangle(app.player.cx - app.player.width, 
+    #     app.player.cy - app.player.width, app.player.cx + app.player.width, 
+    #     app.player.cy + app.player.width, fill='medium purple')
+    if app.wizard.attacking:
+        sprite = app.wizard.attackSprites[app.wizard.attackingCounter]
+    elif app.wizard.isRunning:
+        sprite = app.wizard.runningSprites[app.wizard.runningCounter]
+    else:
+        sprite = app.wizard.idleSprites[app.wizard.idleSpriteCounter]
+    canvas.create_image(app.player.cx, app.player.cy, image=ImageTk.PhotoImage(sprite))
 
 def drawPlayerAttacks(app, canvas):
     for attack in app.currentRoom.playerAttacks:
         cx = attack['cx']
         cy = attack['cy']
         r = attack['radius']
-        canvas.create_oval(cx - r, cy - r, cx + r, cy + r, fill='firebrick1')
+        canvas.create_oval(cx - r, cy - r, cx + r, cy + r, fill='white')
 
 def drawBossAttacks(app, canvas):
     for attack in app.currentRoom.bossAttacks:
@@ -149,7 +173,7 @@ def drawRoom(app, canvas):
     if app.currentRoom == app.bossRoom and app.currentRoom.hasPlayer:
         color = 'dark slate gray'
     else:
-        color = 'light grey'
+        color = 'lightblue4'
     canvas.create_rectangle(0, 0, app.width, app.height, fill=color)
 
 #make doors resizable to the window in the future

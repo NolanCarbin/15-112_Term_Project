@@ -14,6 +14,10 @@ class Player(object):
         return f'Player(Location:{(self.cx, self.cy)}, Health:{self.health})'
 
     def attackWithMouse(self, app, x, y):
+        ##########
+        app.wizard.attackingCounter = 0
+        app.wizard.attacking = True
+        ##########
         radius = 8
         cx, cy = self.cx, self.cy
         deltaX = (x - cx) / self.attackSpeed
@@ -22,6 +26,10 @@ class Player(object):
 
     def attackWithKeys(self, app, key):
         if key not in ['Right', 'Left', 'Up', 'Down']: return 
+        #############
+        app.wizard.attackingCounter = 0
+        app.wizard.attacking = True
+        #############
         radius = 8
         cx, cy = self.cx, self.cy
         deltaX = 0
@@ -55,10 +63,25 @@ def playerMovement(app, key):
         app.player.cy -= app.player.movementSpeed
     elif key == 's':
         app.player.cy += app.player.movementSpeed
-    elif key == 'a':
-        app.player.cx -= app.player.movementSpeed
-    elif key == 'd':
-        app.player.cx += app.player.movementSpeed
+    elif key in {'a', 'Left'}:
+        if key == 'a':
+            app.player.cx -= app.player.movementSpeed
+        app.wizard.isRunning = True
+        if not app.wizard.flipped:
+            app.wizard.flipped = True
+            app.wizard.flipSpriteSheet(app.wizard.runningSprites)
+            app.wizard.flipSpriteSheet(app.wizard.attackSprites)
+            app.wizard.flipSpriteSheet(app.wizard.idleSprites)
+    elif key in {'d', 'Right'}:
+        if key == 'd': 
+            app.player.cx += app.player.movementSpeed
+        app.wizard.isRunning = True
+        if app.wizard.flipped:
+            app.wizard.flipped = False
+            app.wizard.flipSpriteSheet(app.wizard.runningSprites)
+            app.wizard.flipSpriteSheet(app.wizard.attackSprites)
+            app.wizard.flipSpriteSheet(app.wizard.idleSprites)
+
     checkIfChangeOfRoom(app)
     inBoundsOfRoom(app)
 
