@@ -6,3 +6,6 @@ https://jesse-m.itch.io/skeleton-pack
 
 cyclops spritestrip:
 https://elthen.itch.io/2d-pixel-art-cyclops-sprites?download
+
+stones png:
+https://kvsr.itch.io/stone?download

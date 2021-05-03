@@ -9,7 +9,7 @@ class Monster(object):
         #movementSpeed is inverted, lower == faster
         self.movementSpeed = 6
         #physical attack speed:
-        self.attackSpeed = 4
+        self.attackSpeed = 6
         self.health = 6
 
     def __repr__(self):
@@ -62,7 +62,7 @@ class Monster(object):
         return None
 
     def moveTowardPlayer(self, app):
-        path = self.findPlayer(app.graph, app.player)
+        path = self.findPlayer(app.currentRoom.graph, app.player)
         if len(path) >= 1:
             self.cx = path[0][0]
             self.cy = path[0][1]
@@ -123,4 +123,26 @@ class BossMonster(Monster):
                 if attack in app.currentRoom.bossAttacks:
                     app.currentRoom.bossAttacks.remove(attack)                
                     app.player.health -= 1
-                
+    
+class BatMonster(Monster):
+    def __init__(self, cx, cy):
+        super().__init__(cx, cy)
+        self.width = 20
+        #movementSpeed is inverted, lower == faster
+        self.movementSpeed = 3
+        #physical attack speed:
+        self.attackSpeed = 12
+        self.health = 2
+        self.pathToPlayer = []
+    
+    def __repr__(self):
+        return f'BatMonster(Location:{(self.cx, self.cy)}, Health:{self.health})'
+
+    def moveTowardPlayer(self, app):
+        if len(self.pathToPlayer) == 0:
+            self.pathToPlayer = self.findPlayer(app.currentRoom.graph, app.player)
+        if len(self.pathToPlayer) >= 1:
+            self.cx = self.pathToPlayer[0][0]
+            self.cy = self.pathToPlayer[0][1]
+            self.pathToPlayer = self.pathToPlayer[1:]
+            

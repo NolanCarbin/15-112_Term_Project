@@ -12,7 +12,11 @@ class Spritesheet(object):
     def scaleImage(self, app, scale):
         self.spritesheet = app.scaleImage(self.spritesheet, scale)
 
-    
+    def cropImage(self, x0,y0,x1,y1):
+        self.spritesheet = self.spritesheet.crop((x0,y0,x1,y1))
+
+
+
 class PlayerSpritesheet(Spritesheet):
     def __init__(self, app, filename):
         super().__init__(app, filename)
@@ -104,6 +108,28 @@ class BossSpritesheet(Spritesheet):
         bottomY = (47 + 84) * scale
         for i in range(12):
             sprite = self.spritesheet.crop((margin + i * distBetweenSprites, topY, 
+                                            i * distBetweenSprites + spriteWidth, bottomY))
+            self.runningSprites.append(sprite)
+
+    def incrementRunningCounter(self):
+        self.runningCounter = (1 + self.runningCounter) % len(self.runningSprites)
+
+
+class BatSpritesheet(Spritesheet):
+    def __init__(self, app, filename):  
+        super().__init__(app, filename)
+        self.runningSprites = []
+        self.runningCounter = 0
+        self.flipped = False
+        self.isRunning = True
+
+    def initializeRunningSpriteList(self, scale):
+        distBetweenSprites = 16 * scale
+        spriteWidth = 15 * scale
+        topY = 23 * scale
+        bottomY = 41 * scale
+        for i in range(5):
+            sprite = self.spritesheet.crop((i * distBetweenSprites, topY, 
                                             i * distBetweenSprites + spriteWidth, bottomY))
             self.runningSprites.append(sprite)
 

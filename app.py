@@ -10,9 +10,52 @@ import random, time
 #############
 
 def appStarted(app):
-    app.graph = Room.createAdjacencyList(Room.createRoomPixelList(app.width, app.height), 40)
+    app.floorNumber = 0
+    app.doorWidth = 40
+    app.nextDoorWidth = 20
+    app.doors = {
+        'top':[app.width//2 - app.doorWidth, 0, 
+               app.width//2 + app.doorWidth, app.doorWidth//3], 
+        'bottom':[app.width//2 - app.doorWidth, app.height - app.doorWidth//3, 
+                  app.width//2 + app.doorWidth, app.height],
+        'left':[0, app.height//2 - app.doorWidth, 
+                app.doorWidth//3, app.height//2 + app.doorWidth],
+        'right':[app.width - app.doorWidth//3, app.height//2 - app.doorWidth, 
+                 app.width, app.height//2 + app.doorWidth]
+    }
+    initializeWorld(app)
+    initializePlayerAndMonsters(app)
+    initializeSprites(app)
+    app.gameOver = False
+    ##################
+    app.keyPressedTimer = None
+    app.totalKeyPressedTimer = None
+    app.lastKeyPressed = None
+    ##################
+    app.monsterMovementTimer = 0
+    app.monsterAttackTimer = 0
+    app.bossAttackTimer = 0
+    ##################
+    print(app.currentRoom)
+
+def initializeWorld(app):
     app.rooms = Room.generateRooms(Room)
+    for room in app.rooms:
+        #Adds rocks to the room
+        if room.cell != (0,0):
+            roomPixelList = Room.createRoomPixelList(app.width, app.height) 
+            #select a couple of random cells in the pixel list
+            for i in range(random.randint(8,15)):
+                randomCell = findRockRandomCell(app, roomPixelList)
+                # add them to the room.rocks list
+                room.rocks.append(randomCell)
+                #remove them from the list 
+                roomPixelList.remove(randomCell)
+        ####################
+            room.graph = Room.createAdjacencyList(roomPixelList, 40)
     app.roomGraph = Room.createAdjacencyList(Room.createRoomList(), 1)
+
+def initializePlayerAndMonsters(app):
     #sets up player:
     for room in app.rooms:
         if room.hasPlayer:
@@ -24,28 +67,12 @@ def appStarted(app):
         if room.cell == farthestRoomCell:
             app.bossRoom = room
             room.isBossRoom = True
-            room.generateBoss(app.graph, app.width, app.height)
-        if room.cell != (5,5) and room.cell != farthestRoomCell:
+            room.generateBoss(room.graph, app.width, app.height)
+        if room.cell != (0,0) and room.cell != farthestRoomCell:
             for i in range(random.randint(2,5)):
-                room.generateMonster(app.graph, app.width, app.height)
-        
-    app.doorWidth = 40
-    app.doors = {
-        'top':[app.width//2 - app.doorWidth, 0, app.width//2 + app.doorWidth, app.doorWidth//3], 
-        'bottom':[app.width//2 - app.doorWidth, app.height - app.doorWidth//3, app.width//2 + app.doorWidth, app.height],
-        'left':[0, app.height//2 - app.doorWidth, app.doorWidth//3, app.height//2 + app.doorWidth],
-        'right':[app.width - app.doorWidth//3, app.height//2 - app.doorWidth, app.width, app.height//2 + app.doorWidth]
-    }
-    app.gameOver = False
-    ##################
-    app.keyPressedTimer = None
-    app.totalKeyPressedTimer = None
-    app.lastKeyPressed = None
-    ##################
-    app.monsterMovementTimer = 0
-    app.monsterAttackTimer = 0
-    app.bossAttackTimer = 0
-    ##################
+                room.generateMonster(room.graph, app.width, app.height)
+    
+def initializeSprites(app):
     #Sprites:
     app.wizard = PlayerSpritesheet(app, 'images/wizardSpritesheet.png')
     app.wizard.scaleImage(app, .7)
@@ -55,13 +82,42 @@ def appStarted(app):
     app.skeleton = MonsterSpritesheet(app, 'images/skeletonSpritesheet.png')
     app.skeleton.scaleImage(app, 1.7)
     app.skeleton.initializeRunningSpriteList(1.7)
+    app.bat = BatSpritesheet(app, 'images/batSpritesheet.png')
+    app.bat.scaleImage(app, 3)
+    app.bat.initializeRunningSpriteList(3)
     app.boss = BossSpritesheet(app, 'images/cyclopsspritesheet.png')
     app.boss.scaleImage(app, 3)
     app.boss.initializeRunningSpriteList(3)
+    app.rocksImage = Spritesheet(app, 'images/stones.png')
+    app.rocksImage.cropImage(6,539,112,630)
+    app.rocksImage.scaleImage(app, .5)
 
-    ##################
-    print(app.currentRoom)
-    
+
+
+
+def findRockRandomCell(app, roomList):
+    middleX = app.width//2
+    middleY = app.height//2
+    dWidth = app.doorWidth
+    #These are cells/nodes that are right around each of the 4 doors. 
+    #This makes sure that no rock spawns right in front of the door cause the player
+    #to be stuck and not able to proceed to the next room.
+    topDoorSet = {(middleX,0),(middleX,dWidth),(middleX,dWidth*2),(middleX - dWidth,0),
+                  (middleX-dWidth,dWidth),(middleX+dWidth,0),(middleX+dWidth,dWidth)}
+    bottomDoorSet = {(middleX,app.height-dWidth),(middleX,app.height-(dWidth*2)),
+                     (middleX-dWidth,app.height-dWidth),(middleX-dWidth,app.height-(dWidth*2)),
+                     (middleX+dWidth,app.height-dWidth),(middleX+dWidth,app.height-(dWidth*2))}
+    leftDoorSet = {(0,middleY),(dWidth,middleY),(0,middleY-dWidth),(dWidth,middleY-dWidth),
+                   (0,middleY+dWidth),(dWidth,middleY+dWidth)}
+    rightDoorSet = {(app.width-dWidth,middleY),(app.width-(dWidth*2),middleY),
+                    (app.width-dWidth,middleY-dWidth),(app.width-(dWidth*2),middleY-dWidth),
+                    (app.width-dWidth,middleY+dWidth),(app.width-(dWidth*2),middleY+dWidth)}
+    randomCell = random.choice(roomList)
+    while (randomCell in topDoorSet or randomCell in bottomDoorSet or 
+           randomCell in leftDoorSet or randomCell in rightDoorSet):
+        randomCell = random.choice(roomList)
+    return randomCell
+
 def mousePressed(app, event):
     app.player.attackWithMouse(app, event.x, event.y)
 
@@ -73,9 +129,7 @@ def keyPressed(app, event):
     app.lastKeyPressed = event.key
     ###################
     if event.key == 'r':
-        Room.rooms = []
-        Room.selectionRooms = []
-        appStarted(app)
+        restartApp(app)
     playerMovement(app, event.key)
     app.player.attackWithKeys(app, event.key)
     if event.key == 'b':
@@ -84,6 +138,20 @@ def keyPressed(app, event):
         app.currentRoom = app.bossRoom 
         app.currentRoom.hasPlayer = True
         app.currentRoom.player = app.player
+
+def restartApp(app):
+    Room.rooms = []
+    Room.selectionRooms = []
+    appStarted(app)
+
+def advanceToNextFloor(app):
+    playersCurrentHealth = app.player.health
+    currentFloorNumber = app.floorNumber
+    Room.rooms = []
+    Room.selectionRooms = []
+    appStarted(app)
+    app.player.health = playersCurrentHealth
+    app.floorNumber = currentFloorNumber + 1
 
 def keyReleased(app, event):
     app.keyPressedTimer = None
@@ -118,13 +186,19 @@ def timerFired(app):
         if len(app.currentRoom.monsters) == 0: return 
         if app.monsterMovementTimer % monster.movementSpeed == 0:
             monster.moveTowardPlayer(app)
-        if app.monsterMovementTimer % monster.attackSpeed == 0:
+        #The lower the attackSpeed the faster the monsters hit
+        if app.monsterMovementTimer % (monster.attackSpeed - app.floorNumber) == 0:
             monster.inBoundsOfPlayer(app)
         if app.currentRoom == app.bossRoom:
             if app.bossAttackTimer % monster.shootingSpeed == 0:
                 monster.attackPlayer(app)
     ###################
-    # if len(app.bossRoom.monsters) == 0 and if app.player is in bounds of door)
+    if (len(app.bossRoom.monsters) == 0 and app.currentRoom.hasPlayer and 
+           (app.player.cx - app.player.width <= app.width//2 + app.nextDoorWidth and 
+            app.player.cx + app.player.width >= app.width//2 - app.nextDoorWidth and 
+            app.player.cy - app.player.width <= app.height//2 + app.nextDoorWidth and 
+            app.player.cy + app.player.width >= app.height//2 - app.nextDoorWidth)):
+        advanceToNextFloor(app)
     ###################
     #Sprites:
     if app.wizard.attacking:
@@ -135,6 +209,7 @@ def timerFired(app):
         app.wizard.incrementIdleCounter()
     app.skeleton.incrementRunningCounter()
     app.boss.incrementRunningCounter()
+    app.bat.incrementRunningCounter()
 
     #Flips monster's sprites:
     if app.player.cx < app.width//2 and not app.skeleton.flipped: 
@@ -154,6 +229,7 @@ def redrawAll(app, canvas):
         drawGameOver(app, canvas)
     else:
         drawRoom(app, canvas)
+        drawRocks(app, canvas)
         drawDoorToNextFloor(app, canvas)
         drawPlayer(app, canvas)
         drawDoors(app, canvas)
@@ -162,6 +238,7 @@ def redrawAll(app, canvas):
         drawBossAttacks(app, canvas)
         drawPlayerHealth(app, canvas)
         drawMonstersHealth(app, canvas)
+
 
 
 #####################
@@ -229,7 +306,13 @@ def drawMonsters(app, canvas):
             #Sprite
             sprite = app.boss.runningSprites[app.boss.runningCounter]
             canvas.create_image(monster.cx, monster.cy, image=ImageTk.PhotoImage(sprite))
-            
+        elif isinstance(monster, BatMonster):
+            #Hitbox:
+            # canvas.create_rectangle(monster.cx - monster.width, monster.cy - monster.width, 
+            #     monster.cx + monster.width, monster.cy + monster.width, fill='red')
+            #Sprite:
+            sprite = app.bat.runningSprites[app.bat.runningCounter]
+            canvas.create_image(monster.cx, monster.cy, image=ImageTk.PhotoImage(sprite))
         else:
         #Hitbox:
             # canvas.create_rectangle(monster.cx - monster.width,
@@ -248,8 +331,10 @@ def drawPlayerHealth(app, canvas):
 
 def drawMonstersHealth(app, canvas):
     for monster in app.currentRoom.monsters:
-        if app.currentRoom == app.bossRoom:
+        if isinstance(monster, BossMonster):
             monsterHealth = 25
+        elif isinstance(monster, BatMonster):
+            monsterHealth = 2
         else:
             monsterHealth = 6
         x0 = monster.cx - monster.width - 3
@@ -264,9 +349,15 @@ def drawMonstersHealth(app, canvas):
 
 def drawDoorToNextFloor(app, canvas):
     if len(app.bossRoom.monsters) == 0 and app.currentRoom == app.bossRoom:
-        doorWidth = 30
-        canvas.create_rectangle(app.width//2 - doorWidth, app.height//2 - doorWidth,
-            app.width//2 + doorWidth, app.height//2 + doorWidth, fill='black')
+        canvas.create_rectangle(app.width//2 - app.nextDoorWidth, app.height//2 - app.nextDoorWidth,
+            app.width//2 + app.nextDoorWidth, app.height//2 + app.nextDoorWidth, fill='black')
+
+def drawRocks(app, canvas):
+    for x,y in app.currentRoom.rocks:
+        width = app.currentRoom.rockWidth
+        # canvas.create_rectangle(x - width, y - width, 
+        #                         x + width, y + width, fill='brown')
+        canvas.create_image(x,y, image=ImageTk.PhotoImage(app.rocksImage.spritesheet))
 
 def drawGameOver(app, canvas):
     canvas.create_rectangle(0,0,app.width, app.height, fill='black')
@@ -275,5 +366,5 @@ def drawGameOver(app, canvas):
 
 
 ##############
-runApp(width=800, height=600)
+runApp(width=800, height=640)
 ##############
