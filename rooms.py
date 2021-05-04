@@ -19,6 +19,7 @@ class Room(object):
         self.rocks = []
         self.rockWidth = 20
         self.graph = {}
+        self.items = []
 
     def __repr__(self):
         return f'''Room({self.cell}, HasPlayer:{self.hasPlayer}, 
@@ -127,5 +128,4 @@ class Room(object):
                     reached.add(currentNode) 
             if queue.len() == 1:
                 return (queue.queue[0])
-
 

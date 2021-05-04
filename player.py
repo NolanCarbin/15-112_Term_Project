@@ -2,15 +2,23 @@ class Player(object):
     def __init__(self, appWidth, appHeight): 
         self.cx = appWidth//2
         self.cy = appHeight//2
-        self.movementSpeed = 10
         self.width = 20
+        self.movementSpeed = 10
+        self.totalHealth = 12
         self.health = 12
         self.attackSpeed = 15
+        self.attackDamage = 1
+        self.totalMana = 16
+        self.mana = 16
+        self.manaTimer = 0
+        #inverted
+        self.manaRegenSpeed = 5
     
     def __repr__(self):
         return f'Player(Location:{(self.cx, self.cy)}, Health:{self.health})'
 
     def attackWithMouse(self, app, x, y):
+        if self.mana < 2: return 
         ##########
         app.wizard.attackingCounter = 0
         app.wizard.attacking = True
@@ -20,9 +28,11 @@ class Player(object):
         deltaX = (x - cx) / self.attackSpeed
         deltaY = (y - cy) / self.attackSpeed
         app.currentRoom.playerAttacks.append({'cx': cx, 'cy': cy, 'radius': radius, 'deltaX': deltaX, 'deltaY':deltaY})
+        if not app.cheatsOn: self.mana -= 2
 
     def attackWithKeys(self, app, key):
         if key not in ['Right', 'Left', 'Up', 'Down']: return 
+        if self.mana < 2: return 
         #############
         app.wizard.attackingCounter = 0
         app.wizard.attacking = True
@@ -40,6 +50,7 @@ class Player(object):
         elif key == 'Down':
             deltaY = self.attackSpeed
         app.currentRoom.playerAttacks.append({'cx': cx, 'cy': cy, 'radius': radius, 'deltaX': deltaX, 'deltaY':deltaY})
+        if not app.cheatsOn: self.mana -= 2
 
     #taken from: https://www.geeksforgeeks.org/check-if-any-point-overlaps-the-given-circle-and-rectangle/
     #modified to be a method and fit the needs of my app
@@ -89,6 +100,7 @@ def playerMovement(app, key):
     checkIfChangeOfRoom(app)
     inBoundsOfRoom(app)
     inBoundsOfRocks(app)
+    inBoundsOfItem(app)
 
 def movePlayerAttacks(app):
     for attack in app.currentRoom.playerAttacks: 
@@ -103,13 +115,13 @@ def movePlayerAttacks(app):
             if monster.attackInBoundsOfMonster(attack['cx'], attack['cy'], attack['radius']):
                 if attack in app.currentRoom.playerAttacks:
                     app.currentRoom.playerAttacks.remove(attack)                
-                    monster.health -= 1
-                if monster.health == 0:
+                    monster.health -= app.player.attackDamage
+                if monster.health <= 0:
                     app.currentRoom.monsters.remove(monster)
 
 def checkIfChangeOfRoom(app):
     #checks if all monsters in the room are dead
-    if len(app.currentRoom.monsters) == 0:
+    if len(app.currentRoom.monsters) == 0 or app.cheatsOn:
         #left door
         if inBoundsOfDoor(app, 'left') and checkIfAdjacentRoom(app, (0,-1)):
             newRoomCell = (app.currentRoom.cell[0] + (0), app.currentRoom.cell[1] + (-1))
@@ -148,6 +160,7 @@ def inBoundsOfRoom(app):
         player.cy = app.height - player.width   
 
 def inBoundsOfRocks(app):
+    if app.cheatsOn: return False
     player = app.player
     rockWidth = app.currentRoom.rockWidth
     for rockX, rockY in app.currentRoom.rocks:
@@ -193,3 +206,45 @@ def newPlayerPosition(app, direction):
     elif direction == (+1,0):
         app.player.cx = app.width//2
         app.player.cy = app.doorWidth
+
+def inBoundsOfItem(app):
+    player = app.player
+    for dictionary in app.currentRoom.items:
+        x, y = dictionary['cell']
+        function = dictionary['function']
+        if (player.cx - player.width < x + app.itemsWidth and 
+            player.cx + player.width > x - app.itemsWidth and 
+            player.cy - player.width < y + app.itemsWidth and 
+            player.cy + player.width > y - app.itemsWidth):
+                function(app)
+                app.currentRoom.items.remove(dictionary)
+                if dictionary['name'] == 'healthPack':
+                    name = 'HEALTH PACK'
+                if dictionary['name'] == 'speedUp':
+                    name = 'SPEED UP PACK'
+                if dictionary['name'] == 'damageUp':
+                    name = 'DAMAGE UP PACK' 
+                if dictionary['name'] == 'increaseManaRegen':
+                    name = 'MANA REGEN UP PACK'
+                if dictionary['name'] == 'hpUp':
+                    name = 'HP UP PACK'
+                app.message = f"YOU PICKED UP A {name}"
+                print(app.message)
+                #call a function that draws the message on the screen
+#red
+def healthPack(app):
+    app.player.health += 5
+
+#yellow
+def speedUp(app):
+    app.player.movementSpeed += 5
+#green
+def damageUp(app):
+    app.player.attackDamage += 2
+#blue
+def increaseManaRegen(app):
+    app.player.manaRegenSpeed -= 2
+#brown
+def hpUp(app):
+    app.player.health += 5
+    app.player.totalHealth += 5

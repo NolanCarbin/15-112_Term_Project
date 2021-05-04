@@ -63,7 +63,7 @@ class Monster(object):
 
     def moveTowardPlayer(self, app):
         path = self.findPlayer(app.currentRoom.graph, app.player)
-        if len(path) >= 1:
+        if path != None and len(path) >= 1:
             self.cx = path[0][0]
             self.cy = path[0][1]
     
@@ -71,7 +71,8 @@ class Monster(object):
         if (app.player.cx - app.player.width <= self.cx + self.width and 
             app.player.cx + app.player.width >= self.cx - self.width and 
             app.player.cy - app.player.width <= self.cy + self.width and 
-            app.player.cy + app.player.width >= self.cy - self.width):    
+            app.player.cy + app.player.width >= self.cy - self.width): 
+                if app.cheatsOn: return
                 app.player.health -= 1
 
     #taken from: https://www.geeksforgeeks.org/check-if-any-point-overlaps-the-given-circle-and-rectangle/
@@ -121,7 +122,8 @@ class BossMonster(Monster):
             #check if inBoundsOfPlayer:
             if app.player.attackInBoundsOfPlayer(attack['cx'], attack['cy'], attack['radius']):
                 if attack in app.currentRoom.bossAttacks:
-                    app.currentRoom.bossAttacks.remove(attack)                
+                    app.currentRoom.bossAttacks.remove(attack)
+                    if app.cheatsOn: return                
                     app.player.health -= 1
     
 class BatMonster(Monster):

@@ -13,6 +13,8 @@ def appStarted(app):
     app.floorNumber = 0
     app.doorWidth = 40
     app.nextDoorWidth = 20
+    app.itemsWidth = 10
+    app.itemFunctions = {'healthPack': healthPack, 'speedUp': speedUp, 'damageUp': damageUp, 'increaseManaRegen': increaseManaRegen, 'hpUp':hpUp}
     app.doors = {
         'top':[app.width//2 - app.doorWidth, 0, 
                app.width//2 + app.doorWidth, app.doorWidth//3], 
@@ -27,6 +29,7 @@ def appStarted(app):
     initializePlayerAndMonsters(app)
     initializeSprites(app)
     app.gameOver = False
+    app.cheatsOn = False
     ##################
     app.keyPressedTimer = None
     app.totalKeyPressedTimer = None
@@ -51,8 +54,23 @@ def initializeWorld(app):
                 room.rocks.append(randomCell)
                 #remove them from the list 
                 roomPixelList.remove(randomCell)
-        ####################
+            #add items:
+            chance = random.randrange(1,10)
+            #30% chance to add a random item(x,y,function)
+            if chance in {1,2,3}:
+                randomItem = random.choice(list(app.itemFunctions.keys()))
+                itemData = {'cell': random.choice(roomPixelList), 'function':app.itemFunctions[randomItem], 'name': randomItem}
+                room.items.append(itemData)
+            ####################
+            #creates the graph for the specific room
             room.graph = Room.createAdjacencyList(roomPixelList, 40)
+            ####################
+    #Adds 3 health packs in 3 random rooms
+    for i in range(3):
+        randomRoom = random.choice(app.rooms)
+        itemData = {'cell': random.choice(roomPixelList), 'function':app.itemFunctions['healthPack'], 'name': 'healthPack'}
+        randomRoom.items.append(itemData)
+    #Creates a graph of the rooms not the pixels/used to find the farthest room/boss room
     app.roomGraph = Room.createAdjacencyList(Room.createRoomList(), 1)
 
 def initializePlayerAndMonsters(app):
@@ -94,13 +112,12 @@ def initializeSprites(app):
 
 
 
-
 def findRockRandomCell(app, roomList):
     middleX = app.width//2
     middleY = app.height//2
     dWidth = app.doorWidth
     #These are cells/nodes that are right around each of the 4 doors. 
-    #This makes sure that no rock spawns right in front of the door cause the player
+    #This makes sure that no rock spawns right in front of the door causing the player
     #to be stuck and not able to proceed to the next room.
     topDoorSet = {(middleX,0),(middleX,dWidth),(middleX,dWidth*2),(middleX - dWidth,0),
                   (middleX-dWidth,dWidth),(middleX+dWidth,0),(middleX+dWidth,dWidth)}
@@ -120,7 +137,7 @@ def findRockRandomCell(app, roomList):
 
 def mousePressed(app, event):
     app.player.attackWithMouse(app, event.x, event.y)
-
+  
 def keyPressed(app, event):
     #Used for the os delay:
     ###################
@@ -138,20 +155,36 @@ def keyPressed(app, event):
         app.currentRoom = app.bossRoom 
         app.currentRoom.hasPlayer = True
         app.currentRoom.player = app.player
-
+    if event.key == 'c':
+        app.cheatsOn = not app.cheatsOn
+        if app.cheatsOn: print('Cheats are now on')
+        else: print('Cheats are now off')
 def restartApp(app):
     Room.rooms = []
     Room.selectionRooms = []
     appStarted(app)
 
 def advanceToNextFloor(app):
-    playersCurrentHealth = app.player.health
     currentFloorNumber = app.floorNumber
     Room.rooms = []
     Room.selectionRooms = []
+    #Old Player Stats:
+    playersCurrentHealth = app.player.health
+    movementSpeed = app.player.movementSpeed
+    totalHealth = app.player.totalHealth
+    attackDamage = app.player.attackDamage
+    totalMana = app.player.totalMana
+    manaRegenSpeed = app.player.manaRegenSpeed
+    #Reset:
     appStarted(app)
-    app.player.health = playersCurrentHealth
+    #Previous Player Stats:
     app.floorNumber = currentFloorNumber + 1
+    app.player.health = playersCurrentHealth
+    app.player.movementSpeed = movementSpeed
+    app.player.totalHealth = totalHealth
+    app.player.attackDamage = attackDamage 
+    app.player.totalMana = totalMana
+    app.player.manaRegenSpeed = manaRegenSpeed
 
 def keyReleased(app, event):
     app.keyPressedTimer = None
@@ -170,11 +203,18 @@ def timerFired(app):
         app.keyPressedTimer = None
         app.totalKeyPressedTimer = None
     # ##################
+    #Player and bosses shooting attacks
     if len(app.currentRoom.playerAttacks) > 0:
         movePlayerAttacks(app)
     if len(app.currentRoom.bossAttacks) > 0:
         BossMonster.moveBossAttacks(app)
     ###################
+    #Player mana:
+    if app.player.mana < app.player.totalMana:
+        app.player.manaTimer += 1
+        if app.player.manaTimer % app.player.manaRegenSpeed == 0: 
+            app.player.mana += 1
+    ####################
     if app.player.health <= 0:
         app.gameOver = True
     ###################
@@ -193,6 +233,7 @@ def timerFired(app):
             if app.bossAttackTimer % monster.shootingSpeed == 0:
                 monster.attackPlayer(app)
     ###################
+    #Checks if player killed the boss and if is in bounds of the floor door
     if (len(app.bossRoom.monsters) == 0 and app.currentRoom.hasPlayer and 
            (app.player.cx - app.player.width <= app.width//2 + app.nextDoorWidth and 
             app.player.cx + app.player.width >= app.width//2 - app.nextDoorWidth and 
@@ -236,14 +277,16 @@ def redrawAll(app, canvas):
         drawPlayerAttacks(app, canvas)
         drawMonsters(app, canvas)
         drawBossAttacks(app, canvas)
-        drawPlayerHealth(app, canvas)
+        drawPlayerHealthAndMana(app, canvas)
         drawMonstersHealth(app, canvas)
+        drawItems(app, canvas)
 
 
 
 #####################
 #Drawing Functions
 #####################
+
 def drawPlayer(app, canvas):
     #HitBox:
     # canvas.create_rectangle(app.player.cx - app.player.width, 
@@ -321,13 +364,20 @@ def drawMonsters(app, canvas):
             sprite = app.skeleton.runningSprites[app.skeleton.runningCounter]
             canvas.create_image(monster.cx, monster.cy, image=ImageTk.PhotoImage(sprite))
     
-def drawPlayerHealth(app, canvas):
+def drawPlayerHealthAndMana(app, canvas):
     x0,y0,x1,y1 = 40,20,202,40
     canvas.create_rectangle(x0,y0,x1,y1, fill='white', width=2)
     healthBarWidth = 160
-    cellWidth = healthBarWidth / (12) #app.player.health * 2(because monsters hit 0.5)
+    cellWidth = healthBarWidth / (app.player.totalHealth)
     for i in range(app.player.health):
         canvas.create_rectangle(i * cellWidth + 41, 21, (i * cellWidth + 41) + cellWidth, 39, fill='red', width=0)
+
+    x0,y0,x1,y1 = 40,50,161,65
+    canvas.create_rectangle(x0,y0,x1,y1, fill='white', width=2)
+    manaBarWidth = 120
+    cellWidth = manaBarWidth / (app.player.totalMana) #app.player.health * 2(because monsters hit 0.5)
+    for i in range(app.player.mana):
+        canvas.create_rectangle(i * cellWidth + x0, y0 + 1, (i * cellWidth + x0) + cellWidth, y1 - 1, fill='blue', width=0)
 
 def drawMonstersHealth(app, canvas):
     for monster in app.currentRoom.monsters:
@@ -358,6 +408,23 @@ def drawRocks(app, canvas):
         # canvas.create_rectangle(x - width, y - width, 
         #                         x + width, y + width, fill='brown')
         canvas.create_image(x,y, image=ImageTk.PhotoImage(app.rocksImage.spritesheet))
+
+def drawItems(app, canvas):
+    for dictionary in app.currentRoom.items:
+        x,y = dictionary['cell']
+        name = dictionary['name']
+        if name == 'healthPack':
+            color = 'red'
+        if name == 'speedUp':
+            color = 'yellow'
+        if name == 'damageUp':
+            color = 'purple' 
+        if name == 'increaseManaRegen':
+            color = 'blue'
+        if name == 'hpUp':
+            color = 'brown'
+        canvas.create_rectangle(x - app.itemsWidth, y - app.itemsWidth, 
+                            x + app.itemsWidth, y + app.itemsWidth, fill=color)
 
 def drawGameOver(app, canvas):
     canvas.create_rectangle(0,0,app.width, app.height, fill='black')

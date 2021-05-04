@@ -18,15 +18,20 @@ Things completed since TP1:
 
 
 Next steps for TP3:
--Add obstacles
+-Add more room design/background
+-Add a physical attack with sprite 
+-Add cool shapes to the items
+-Add a small map upper right
+-Add a starting screen 
+-Add 1 more monster
+-cache images?
+
+Completed:
+-XAdd obstacles
     player cannot move through rocks and cannot attack through them same with boss
 -Add 1 or 2 more monsters
--Add 1 or 2 items to change the players mechanics
--Add more room design/background
-
-
-
--Add a starting screen 
--Add 1 or 2 health packs in random rooms 
--Once player beats the boss, and goes down to the next floor, make monsters stronger 
+-XAdd 1 or 2 items to change the players mechanics
+-XAdded a mana mechanic 
+-XAdd 1 or 2 health packs in random rooms 
+-XOnce player beats the boss, and goes down to the next floor, make monsters stronger 
 -Add 1 more boss that has different mechanics
