@@ -1,6 +1,9 @@
 import random
 from monsters import *
 
+#Room class 
+#Contains room specific methods that alter the room object
+
 class Room(object):
     rooms = []
     selectionRooms = []

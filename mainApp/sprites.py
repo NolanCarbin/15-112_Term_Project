@@ -1,5 +1,8 @@
 from PIL import Image, ImageTk, ImageDraw, ImageFont
 
+#sprites file that contains the multiple sprites classes that use the PIL/Pillow 
+#library 
+
 class Spritesheet(object):
     def __init__(self, app, filename):
         self.filename = filename
@@ -26,7 +29,8 @@ class PlayerSpritesheet(Spritesheet):
         self.physicalAttackSprites = []
         self.idleSpriteCounter = self.runningCounter = 0
         self.attackingCounter = self.physicalAttackCounter = 0
-        self.flipped = self.isRunning = self.attacking = self.physicalAttacking = False
+        self.flipped = self.isRunning = False
+        self.attacking = self.physicalAttacking = False
 
     def initializeIdleSpriteList(self):
         margin = 48
@@ -35,8 +39,8 @@ class PlayerSpritesheet(Spritesheet):
         topY = 40
         bottomY = 100
         for i in range(6):
-            sprite = self.spritesheet.crop((margin + i * distBetweenSprites, topY, 
-                                            spriteWidth + i * distBetweenSprites, bottomY))
+            sprite = self.spritesheet.crop((margin + i * distBetweenSprites, 
+                        topY, spriteWidth + i * distBetweenSprites, bottomY))
             self.idleSprites.append(sprite)
 
     def initializeRunningSpriteList(self):
@@ -46,8 +50,8 @@ class PlayerSpritesheet(Spritesheet):
         topY = 40
         bottomY = 100
         for i in range(14,22):
-            sprite = self.spritesheet.crop((margin + i * distBetweenSprites, topY, 
-                                            spriteWidth + i * distBetweenSprites, bottomY))
+            sprite = self.spritesheet.crop((margin + i * distBetweenSprites, 
+                        topY, spriteWidth + i * distBetweenSprites, bottomY))
             self.runningSprites.append(sprite)
 
     def initializeAttackSpriteList(self):
@@ -57,8 +61,8 @@ class PlayerSpritesheet(Spritesheet):
         topY = 40
         bottomY = 100
         for i in range(6,11):
-            sprite = self.spritesheet.crop((margin + i * distBetweenSprites, topY, 
-                                            spriteWidth + i * distBetweenSprites, bottomY))
+            sprite = self.spritesheet.crop((margin + i * distBetweenSprites, 
+                        topY, spriteWidth + i * distBetweenSprites, bottomY))
             self.attackSprites.append(sprite)
     
     def initializePhysicalAttackSpriteList(self):
@@ -68,8 +72,8 @@ class PlayerSpritesheet(Spritesheet):
         topY = 22
         bottomY = 100
         for i in range(22,30):
-            sprite = self.spritesheet.crop((margin + i * distBetweenSprites, topY, 
-                                            spriteWidth + i * distBetweenSprites, bottomY))
+            sprite = self.spritesheet.crop((margin + i * distBetweenSprites, 
+                        topY, spriteWidth + i * distBetweenSprites, bottomY))
             self.physicalAttackSprites.append(sprite)
 
     def incrementIdleCounter(self):
@@ -102,8 +106,8 @@ class MonsterSpritesheet(Spritesheet):
         topY = 0 * scale
         bottomY = 37 * scale
         for i in range(13):
-            sprite = self.spritesheet.crop((i * distBetweenSprites, topY, 
-                                            i * distBetweenSprites + spriteWidth, bottomY))
+            sprite = self.spritesheet.crop((i * distBetweenSprites, 
+                        topY, i * distBetweenSprites + spriteWidth, bottomY))
             self.runningSprites.append(sprite)
 
     def incrementRunningCounter(self):
@@ -125,8 +129,8 @@ class BossSpritesheet(Spritesheet):
         topY = 84 * scale
         bottomY = (47 + 84) * scale
         for i in range(12):
-            sprite = self.spritesheet.crop((margin + i * distBetweenSprites, topY, 
-                                            i * distBetweenSprites + spriteWidth, bottomY))
+            sprite = self.spritesheet.crop((margin + i * distBetweenSprites, 
+                        topY, i * distBetweenSprites + spriteWidth, bottomY))
             self.runningSprites.append(sprite)
 
     def incrementRunningCounter(self):
@@ -148,7 +152,7 @@ class BatSpritesheet(Spritesheet):
         bottomY = 41 * scale
         for i in range(5):
             sprite = self.spritesheet.crop((i * distBetweenSprites, topY, 
-                                            i * distBetweenSprites + spriteWidth, bottomY))
+                                i * distBetweenSprites + spriteWidth, bottomY))
             self.runningSprites.append(sprite)
 
     def incrementRunningCounter(self):

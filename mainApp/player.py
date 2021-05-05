@@ -1,3 +1,8 @@
+#Player file contains the player class and methods that 
+#control the player object. This file also has normal functions 
+#that relate to the player. Including changing rooms, the item functions, 
+#and checking if the player is in bounds of any of the objects on the screen 
+
 class Player(object):
     def __init__(self, appWidth, appHeight): 
         self.cx = appWidth//2
@@ -27,7 +32,8 @@ class Player(object):
         cx, cy = self.cx, self.cy
         deltaX = (x - cx) / self.attackSpeed
         deltaY = (y - cy) / self.attackSpeed
-        app.currentRoom.playerAttacks.append({'cx': cx, 'cy': cy, 'radius': radius, 'deltaX': deltaX, 'deltaY':deltaY})
+        app.currentRoom.playerAttacks.append({'cx': cx, 'cy': cy, 
+            'radius': radius, 'deltaX': deltaX, 'deltaY':deltaY})
         if not app.debugOn: self.mana -= 2
 
     def attackWithKeys(self, app, key):
@@ -49,10 +55,12 @@ class Player(object):
             deltaY = -self.attackSpeed
         elif key == 'Down':
             deltaY = self.attackSpeed
-        app.currentRoom.playerAttacks.append({'cx': cx, 'cy': cy, 'radius': radius, 'deltaX': deltaX, 'deltaY':deltaY})
+        app.currentRoom.playerAttacks.append({'cx': cx, 'cy': cy, 
+                        'radius': radius, 'deltaX': deltaX, 'deltaY':deltaY})
         if not app.debugOn: self.mana -= 2
 
-    #taken from: https://www.geeksforgeeks.org/check-if-any-point-overlaps-the-given-circle-and-rectangle/
+    #taken from: 
+    #https://www.geeksforgeeks.org/check-if-any-point-overlaps-the-given-circle-and-rectangle/
     #modified to be a method and fit the needs of my app
     def attackInBoundsOfPlayer(self, circleX, circleY, r): 
         x1, y1 = self.cx - self.width, self.cy - self.width
@@ -72,11 +80,16 @@ class Player(object):
         app.wizard.physicalAttacking = True
         if not app.debugOn: self.mana -= 6
         radius = 8
-        deltas = {'right': (self.attackSpeed, 0), 'down': (0, self.attackSpeed), 'left': (-self.attackSpeed, 0), 'up': (0, -self.attackSpeed),
-        'down-right': (self.attackSpeed, self.attackSpeed), 'down-left': (-self.attackSpeed, self.attackSpeed), 'up-left': (-self.attackSpeed, -self.attackSpeed), 'up-right': (self.attackSpeed, -self.attackSpeed)}
+        deltas = {'right': (self.attackSpeed, 0), 'down': (0, self.attackSpeed), 
+            'left': (-self.attackSpeed, 0), 'up': (0, -self.attackSpeed),
+            'down-right': (self.attackSpeed, self.attackSpeed), 
+            'down-left': (-self.attackSpeed, self.attackSpeed), 
+            'up-left': (-self.attackSpeed, -self.attackSpeed), 
+            'up-right': (self.attackSpeed, -self.attackSpeed)}
         for key in deltas:
             deltaX, deltaY = deltas[key]
-            app.currentRoom.playerAttacks.append({'cx': self.cx, 'cy': self.cy, 'radius': radius, 'deltaX': deltaX, 'deltaY':deltaY})
+            app.currentRoom.playerAttacks.append({'cx': self.cx, 'cy': self.cy, 
+                        'radius': radius, 'deltaX': deltaX, 'deltaY':deltaY})
 
 def playerMovement(app, key):
     if key == 'w':

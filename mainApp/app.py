@@ -6,7 +6,10 @@ from sprites import *
 import random, time
 
 #############
-#Main App
+#Main App 
+#Contains all general app functions, initialization functions, 
+#drawing functions, and cmu_112_graphics top level functions.
+
 #############
 
 def appStarted(app):
@@ -21,7 +24,9 @@ def appStarted(app):
     app.nextDoorWidth = 20
     app.itemsWidth = 10
     app.mapMargin = 140
-    app.itemFunctions = {'healthPack': healthPack, 'speedUp': speedUp, 'damageUp': damageUp, 'increaseManaRegen': increaseManaRegen, 'hpUp':hpUp}
+    app.itemFunctions = {'healthPack': healthPack, 'speedUp': speedUp, 
+                'damageUp': damageUp, 'increaseManaRegen': increaseManaRegen, 
+                'hpUp':hpUp}
     app.doors = {
         'top':[app.width//2 - app.doorWidth, 0, 
                app.width//2 + app.doorWidth, app.doorWidth//3], 
@@ -70,7 +75,9 @@ def initializeWorld(app):
             #20% chance to add a random item(x,y,function)
             if chance in {1,2}:
                 randomItem = random.choice(list(app.itemFunctions.keys()))
-                itemData = {'cell': random.choice(roomPixelList), 'function':app.itemFunctions[randomItem], 'name': randomItem}
+                itemData = {'cell': random.choice(roomPixelList), 
+                            'function':app.itemFunctions[randomItem], 
+                            'name': randomItem}
                 room.items.append(itemData)
             ####################
             #creates the graph for the specific room
@@ -81,9 +88,12 @@ def initializeWorld(app):
         randomRoom = random.choice(app.rooms)
         while randomRoom.cell == (0,0):
             randomRoom = random.choice(app.rooms)
-        itemData = {'cell': random.choice(roomPixelList), 'function':app.itemFunctions['healthPack'], 'name': 'healthPack'}
+        itemData = {'cell': random.choice(roomPixelList), 
+                    'function':app.itemFunctions['healthPack'], 
+                    'name': 'healthPack'}
         randomRoom.items.append(itemData)
-    #Creates a graph of the rooms not the pixels/used to find the farthest room/boss room
+    #Creates a graph of the rooms not the pixels/used to find 
+    #the farthest room/boss room
     app.roomGraph = Room.createAdjacencyList(Room.createRoomList(), 1)
 
 def initializePlayerAndMonsters(app):
@@ -128,8 +138,8 @@ def findRockRandomCell(app, roomList):
     middleY = app.height//2
     dWidth = app.doorWidth
     #These are cells/nodes that are right around each of the 4 doors. 
-    #This makes sure that no rock spawns right in front of the door causing the player
-    #to be stuck and not able to proceed to the next room.
+    #This makes sure that no rock spawns right in front of the door 
+    #causing the player to be stuck and not able to proceed to the next room.
     topDoorSet = {(middleX,0),(middleX,dWidth),(middleX,dWidth*2),(middleX - dWidth,0),
                   (middleX-dWidth,dWidth),(middleX+dWidth,0),(middleX+dWidth,dWidth)}
     bottomDoorSet = {(middleX,app.height-dWidth),(middleX,app.height-(dWidth*2)),
@@ -251,11 +261,13 @@ def timerFired(app):
         movesStartScreenCircle(app)
     #Used for the os delay:
     ##################
-    if app.keyPressedTimer != None and time.time() - app.keyPressedTimer >= 0.02:
+    if (app.keyPressedTimer != None and 
+        time.time() - app.keyPressedTimer >= 0.02):
         playerMovement(app, app.lastKeyPressed) 
         app.keyPressedTimer = time.time() #reset the timer
     #Lets the OS repeat the function call
-    if app.totalKeyPressedTimer != None and time.time() - app.totalKeyPressedTimer >= 0.5: 
+    if (app.totalKeyPressedTimer != None and 
+        time.time() - app.totalKeyPressedTimer >= 0.5): 
         app.keyPressedTimer = None
         app.totalKeyPressedTimer = None
     # ##################
@@ -422,15 +434,20 @@ def drawRoom(app, canvas):
     canvas.create_rectangle(0, 0, app.width, app.height, fill=color)
     #Floor number
     if app.currentRoom.cell == (0,0):
-        canvas.create_text(app.width//2, app.height//2, text=f'{Room.floorNumber + 1}', font='Arial 80 bold', fill='white')
+        canvas.create_text(app.width//2, app.height//2, 
+            text=f'{Room.floorNumber + 1}', font='Arial 80 bold', fill='white')
     #left wall
-    canvas.create_rectangle(0,0, app.doorWidth//3, app.height, fill='dark grey', width=0)
+    canvas.create_rectangle(0,0, app.doorWidth//3, app.height, 
+            fill='dark grey', width=0)
     #bottom wall
-    canvas.create_rectangle(0,app.height - app.doorWidth//3, app.width, app.height, fill='dark grey', width=0)
+    canvas.create_rectangle(0,app.height - app.doorWidth//3, 
+            app.width, app.height, fill='dark grey', width=0)
     #right wall 
-    canvas.create_rectangle(app.width - app.doorWidth//3, 0, app.width, app.height, fill='dark grey', width=0)
+    canvas.create_rectangle(app.width - app.doorWidth//3, 0, 
+            app.width, app.height, fill='dark grey', width=0)
     #top wall 
-    canvas.create_rectangle(0, 0, app.width, app.doorWidth//3, fill='dark grey', width=0)
+    canvas.create_rectangle(0, 0, app.width, app.doorWidth//3, 
+            fill='dark grey', width=0)
 
 #make doors resizable to the window in the future
 def drawDoors(app, canvas):
@@ -441,13 +458,21 @@ def drawDoors(app, canvas):
     for drow, dcol in dirs:
         if checkIfAdjacentRoom(app, (drow,dcol)):
             if drow == -1: #top door
-                canvas.create_rectangle(app.doors['top'][0], app.doors['top'][1], app.doors['top'][2], app.doors['top'][3], fill=color, width=0)
+                canvas.create_rectangle(app.doors['top'][0], 
+                        app.doors['top'][1], app.doors['top'][2], 
+                        app.doors['top'][3], fill=color, width=0)
             elif drow == +1: #bottom door
-                canvas.create_rectangle(app.doors['bottom'][0], app.doors['bottom'][1], app.doors['bottom'][2], app.doors['bottom'][3], fill=color, width=0)
+                canvas.create_rectangle(app.doors['bottom'][0], 
+                        app.doors['bottom'][1], app.doors['bottom'][2], 
+                        app.doors['bottom'][3], fill=color, width=0)
             elif dcol == -1: #left door
-                canvas.create_rectangle(app.doors['left'][0], app.doors['left'][1], app.doors['left'][2], app.doors['left'][3], fill=color, width=0)
+                canvas.create_rectangle(app.doors['left'][0], 
+                        app.doors['left'][1], app.doors['left'][2], 
+                        app.doors['left'][3], fill=color, width=0)
             elif dcol == +1: #right door
-                canvas.create_rectangle(app.doors['right'][0], app.doors['right'][1], app.doors['right'][2], app.doors['right'][3], fill=color, width=0)
+                canvas.create_rectangle(app.doors['right'][0], 
+                        app.doors['right'][1], app.doors['right'][2], 
+                        app.doors['right'][3], fill=color, width=0)
 
 def drawMonsters(app, canvas):
     for monster in app.currentRoom.monsters:
@@ -458,21 +483,26 @@ def drawMonsters(app, canvas):
             #         monster.cy + monster.width, fill='green')
             #Sprite
             sprite = app.boss.runningSprites[app.boss.runningCounter]
-            canvas.create_image(monster.cx, monster.cy, image=ImageTk.PhotoImage(sprite))
+            canvas.create_image(monster.cx, monster.cy, 
+                                image=ImageTk.PhotoImage(sprite))
         elif isinstance(monster, BatMonster):
             #Hitbox:
-            # canvas.create_rectangle(monster.cx - monster.width, monster.cy - monster.width, 
-            #     monster.cx + monster.width, monster.cy + monster.width, fill='red')
+            # canvas.create_rectangle(monster.cx - monster.width, 
+            #       monster.cy - monster.width, monster.cx + monster.width, 
+            #       monster.cy + monster.width, fill='red')
             #Sprite:
             sprite = app.bat.runningSprites[app.bat.runningCounter]
-            canvas.create_image(monster.cx, monster.cy, image=ImageTk.PhotoImage(sprite))
+            canvas.create_image(monster.cx, monster.cy, 
+                                image=ImageTk.PhotoImage(sprite))
         else:
         #Hitbox:
             # canvas.create_rectangle(monster.cx - monster.width,
-            # monster.cy - monster.width, monster.cx + monster.width, monster.cy + monster.width, fill='green')
+            #         monster.cy - monster.width, monster.cx + monster.width, 
+            #         monster.cy + monster.width, fill='green')
         #Sprite:
             sprite = app.skeleton.runningSprites[app.skeleton.runningCounter]
-            canvas.create_image(monster.cx, monster.cy, image=ImageTk.PhotoImage(sprite))
+            canvas.create_image(monster.cx, monster.cy, 
+                                image=ImageTk.PhotoImage(sprite))
     
 def drawPlayerHealthAndMana(app, canvas):
     x0,y0,x1,y1 = 40,20,202,40
@@ -480,14 +510,16 @@ def drawPlayerHealthAndMana(app, canvas):
     healthBarWidth = 160
     cellWidth = healthBarWidth / (app.player.totalHealth)
     for i in range(app.player.health):
-        canvas.create_rectangle(i * cellWidth + 41, 21, (i * cellWidth + 41) + cellWidth, 39, fill='red', width=0)
+        canvas.create_rectangle(i * cellWidth + 41, 21, 
+                (i * cellWidth + 41) + cellWidth, 39, fill='red', width=0)
 
     x0,y0,x1,y1 = 40,50,161,65
     canvas.create_rectangle(x0,y0,x1,y1, fill='white', width=2)
     manaBarWidth = 120
-    cellWidth = manaBarWidth / (app.player.totalMana) #app.player.health * 2(because monsters hit 0.5)
+    cellWidth = manaBarWidth / (app.player.totalMana) 
     for i in range(app.player.mana):
-        canvas.create_rectangle(i * cellWidth + x0, y0 + 1, (i * cellWidth + x0) + cellWidth, y1 - 1, fill='blue', width=0)
+        canvas.create_rectangle(i * cellWidth + x0, y0 + 1, 
+                (i * cellWidth + x0) + cellWidth, y1 - 1, fill='blue', width=0)
 
 def drawMonstersHealth(app, canvas):
     for monster in app.currentRoom.monsters:
@@ -505,7 +537,8 @@ def drawMonstersHealth(app, canvas):
         healthBarWidth = (monster.cx + monster.width + 3) - (monster.cx - monster.width - 3)
         cellWidth = healthBarWidth / monsterHealth
         for i in range(monster.health):
-            canvas.create_rectangle(i * cellWidth + x0, y0, (i * cellWidth + x0) + cellWidth, y1, fill='red', width=0)
+            canvas.create_rectangle(i * cellWidth + x0, y0, 
+                    (i * cellWidth + x0) + cellWidth, y1, fill='red', width=0)
 
 def drawDoorToNextFloor(app, canvas):
     if len(app.bossRoom.monsters) == 0 and app.currentRoom == app.bossRoom:
@@ -513,15 +546,17 @@ def drawDoorToNextFloor(app, canvas):
             color = 'gold2'
         else:
             color = 'black'
-        canvas.create_rectangle(app.width//2 - app.nextDoorWidth, app.height//2 - app.nextDoorWidth,
-            app.width//2 + app.nextDoorWidth, app.height//2 + app.nextDoorWidth, fill=color)
+        canvas.create_rectangle(app.width//2 - app.nextDoorWidth, 
+            app.height//2 - app.nextDoorWidth, app.width//2 + app.nextDoorWidth, 
+            app.height//2 + app.nextDoorWidth, fill=color)
 
 def drawRocks(app, canvas):
     for x,y in app.currentRoom.rocks:
         width = app.currentRoom.rockWidth
         # canvas.create_rectangle(x - width, y - width, 
         #                         x + width, y + width, fill='brown')
-        canvas.create_image(x,y, image=ImageTk.PhotoImage(app.rocksImage.spritesheet))
+        canvas.create_image(x,y, 
+                    image=ImageTk.PhotoImage(app.rocksImage.spritesheet))
 
 def drawItems(app, canvas):
     for dictionary in app.currentRoom.items:
@@ -542,7 +577,9 @@ def drawItems(app, canvas):
 
 def drawGameOver(app, canvas):
     canvas.create_rectangle(0,0,app.width, app.height, fill='black')
-    canvas.create_text(app.width//2, app.height//2, text='GAMEOVER!\nYOU DIED!\nPress r to restart', fill='yellow', font='Arial 24 bold')
+    canvas.create_text(app.width//2, app.height//2, 
+        text='GAMEOVER!\nYOU DIED!\nPress r to restart', 
+        fill='yellow', font='Arial 24 bold')
 
 def drawMap(app, canvas):
     if app.displayingMap == False: return 
@@ -552,7 +589,8 @@ def drawMap(app, canvas):
             color = 'white'
         elif len(room.monsters) >= 1:
             color = 'dim gray'
-        if room == app.bossRoom and (room == app.currentRoom or len(room.monsters) <= 0):
+        if (room == app.bossRoom and 
+           (room == app.currentRoom or len(room.monsters) <= 0)):
             color = 'red'
         elif len(room.monsters) == 0:
             color = 'mint cream'
@@ -582,18 +620,26 @@ def drawMessage(app, canvas):
 def drawStartScreen(app, canvas):
     canvas.create_rectangle(0,0,app.width, app.height, fill='MediumPurple4')
     canvas.create_rectangle(15,15, app.width - 15, app.height - 15, width=4)
-    canvas.create_oval(app.startScreenX - app.startScreenR, app.startScreenY - app.startScreenR,
-        app.startScreenX + app.startScreenR, app.startScreenY + app.startScreenR, fill='white')
-    canvas.create_text(app.width//2, app.height//4, text='Dungeon Wizard', font='Arial 36 bold', fill='white')
+    canvas.create_oval(app.startScreenX - app.startScreenR, 
+            app.startScreenY - app.startScreenR,
+            app.startScreenX + app.startScreenR, 
+            app.startScreenY + app.startScreenR, fill='white')
+    canvas.create_text(app.width//2, app.height//4, 
+            text='Dungeon Wizard', font='Arial 36 bold', fill='white')
     buttonX0 = app.width//2 - 60
     buttonY0 = app.height//2 - 30
     buttonX1 = app.width//2 + 60
     buttonY1 = app.height//2 + 30
-    canvas.create_rectangle(buttonX0 - 80, buttonY0 + 40, buttonX1 - 80, buttonY1 + 40, width=4)
-    canvas.create_rectangle(buttonX0 + 80, buttonY0 + 40, buttonX1 + 80, buttonY1 + 40, width=4)
-    canvas.create_text(app.width//2 - 80, app.height//2 + 40, text='Start', fill='yellow', font='Arial 28 bold')
-    canvas.create_text(app.width//2 + 80, app.height//2 + 40, text='Info', fill='yellow', font='Arial 28 bold')
-    canvas.create_text(app.width//2, app.height//2.8, text='Created by Nolan Carbin', font='Arial 12 bold', fill='white')
+    canvas.create_rectangle(buttonX0 - 80, buttonY0 + 40, 
+            buttonX1 - 80, buttonY1 + 40, width=4)
+    canvas.create_rectangle(buttonX0 + 80, buttonY0 + 40, 
+            buttonX1 + 80, buttonY1 + 40, width=4)
+    canvas.create_text(app.width//2 - 80, app.height//2 + 40, 
+            text='Start', fill='yellow', font='Arial 28 bold')
+    canvas.create_text(app.width//2 + 80, app.height//2 + 40, 
+            text='Info', fill='yellow', font='Arial 28 bold')
+    canvas.create_text(app.width//2, app.height//2.8, 
+            text='Created by Nolan Carbin', font='Arial 12 bold', fill='white')
 
 def drawInfoScreen(app, canvas):
     text = '''
@@ -639,12 +685,14 @@ def drawInfoScreen(app, canvas):
     Bat:
     https://elthen.itch.io/bat-sprite-pack
     '''
-    canvas.create_text(app.width//2, app.height//2, text=text, font='Arial 8 bold')
+    canvas.create_text(app.width//2, app.height//2, 
+            text=text, font='Arial 8 bold')
 
 def drawWinningScreen(app, canvas):
     canvas.create_rectangle(0,0, app.width, app.height, fill='gold2')
-    canvas.create_text(app.width//2, app.height//2, text='CONGRATULATIONS\nYOU BEAT THE GAME!', 
-    font='Arial 32 bold', fill='white')
+    canvas.create_text(app.width//2, app.height//2, 
+            text='CONGRATULATIONS\nYOU BEAT THE GAME!', 
+            font='Arial 32 bold', fill='white')
 
 
 ##############

@@ -1,6 +1,9 @@
 import math
 from StacksAndQueues import Queue
 
+#Monster file 
+#Contains the monster class and methods that are related to the monster object
+
 class Monster(object):
     def __init__(self, cx, cy):
         self.width = 20
@@ -24,8 +27,9 @@ class Monster(object):
     #findPlayer() uses BFS to tell if there is a path from the monster to the 
     #player, and path() returns the path from the current cell of the monster 
     #to the cell nearest to the player. I interpreted the code from the site, 
-    #and used it to fit my needs. Instead checking if the currentNode == goalNode
-    #I made it check if the currentNode(monster's cell) was in the bounds of the the player's cell.
+    #and used it to fit my needs. Instead checking if the 
+    #currentNode == goalNode I made it check if the currentNode(monster's cell) 
+    #was in the bounds of the the player's cell.
 
     @staticmethod
     def path(goalCell, cameFrom, startingCell):
@@ -108,7 +112,8 @@ class BossMonster(Monster):
         radius = 8
         deltaX = (app.player.cx - cx) / self.shootingSpeed
         deltaY = (app.player.cy - cy) / self.shootingSpeed
-        app.currentRoom.bossAttacks.append({'cx': cx, 'cy': cy, 'radius': radius, 'deltaX': deltaX, 'deltaY':deltaY})
+        app.currentRoom.bossAttacks.append({'cx': cx, 'cy': cy, 
+                        'radius': radius, 'deltaX': deltaX, 'deltaY':deltaY})
 
     @staticmethod
     def moveBossAttacks(app):
