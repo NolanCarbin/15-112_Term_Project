@@ -420,24 +420,34 @@ def drawRoom(app, canvas):
     else:
         color = 'lightblue4'
     canvas.create_rectangle(0, 0, app.width, app.height, fill=color)
+    #Floor number
     if app.currentRoom.cell == (0,0):
         canvas.create_text(app.width//2, app.height//2, text=f'{Room.floorNumber + 1}', font='Arial 80 bold', fill='white')
+    #left wall
+    canvas.create_rectangle(0,0, app.doorWidth//3, app.height, fill='dark grey', width=0)
+    #bottom wall
+    canvas.create_rectangle(0,app.height - app.doorWidth//3, app.width, app.height, fill='dark grey', width=0)
+    #right wall 
+    canvas.create_rectangle(app.width - app.doorWidth//3, 0, app.width, app.height, fill='dark grey', width=0)
+    #top wall 
+    canvas.create_rectangle(0, 0, app.width, app.doorWidth//3, fill='dark grey', width=0)
 
 #make doors resizable to the window in the future
 def drawDoors(app, canvas):
     dirs = [(0,-1),(0,+1),(-1,0),(+1,0)]
     if len(app.currentRoom.monsters) != 0: color = 'dim gray'
-    else: color = 'dark grey'
+    elif app.bossRoom.hasPlayer: color = 'dark slate gray'
+    else: color = 'lightblue4'
     for drow, dcol in dirs:
         if checkIfAdjacentRoom(app, (drow,dcol)):
             if drow == -1: #top door
-                canvas.create_rectangle(app.doors['top'][0], app.doors['top'][1], app.doors['top'][2], app.doors['top'][3], fill=color)
+                canvas.create_rectangle(app.doors['top'][0], app.doors['top'][1], app.doors['top'][2], app.doors['top'][3], fill=color, width=0)
             elif drow == +1: #bottom door
-                canvas.create_rectangle(app.doors['bottom'][0], app.doors['bottom'][1], app.doors['bottom'][2], app.doors['bottom'][3], fill=color)
+                canvas.create_rectangle(app.doors['bottom'][0], app.doors['bottom'][1], app.doors['bottom'][2], app.doors['bottom'][3], fill=color, width=0)
             elif dcol == -1: #left door
-                canvas.create_rectangle(app.doors['left'][0], app.doors['left'][1], app.doors['left'][2], app.doors['left'][3], fill=color)
+                canvas.create_rectangle(app.doors['left'][0], app.doors['left'][1], app.doors['left'][2], app.doors['left'][3], fill=color, width=0)
             elif dcol == +1: #right door
-                canvas.create_rectangle(app.doors['right'][0], app.doors['right'][1], app.doors['right'][2], app.doors['right'][3], fill=color)
+                canvas.create_rectangle(app.doors['right'][0], app.doors['right'][1], app.doors['right'][2], app.doors['right'][3], fill=color, width=0)
 
 def drawMonsters(app, canvas):
     for monster in app.currentRoom.monsters:
