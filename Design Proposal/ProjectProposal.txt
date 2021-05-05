@@ -1,6 +1,6 @@
 Project Description:
-    Name - Archelight
-    Description - Archelight is dungeon crawler video game, that has many randomized aspects, including randomly generated floors, monsters, items, etc. 
+    Name - Dungeon Wizard
+    Description - Dungeon Wizard is dungeon crawler video game, that has many randomized aspects, including randomly generated floors, monsters, items, etc. 
 
 Competitive Analysis:
     1 paragraph analysis of similar projects, how my project will be similar or different to those:

@@ -1,19 +1,37 @@
 # 15-112_Term_Project
-My 15-112 project is called Dungeon Wizard. 
+
+Name - Dungeon Wizard
+Description - Dungeon Wizard is Roguelike video game, that has many randomized aspects, including randomly generated floors, monsters, bosses, and items. The player plays as a wizard that traverses multiple rooms and floors, trying to find the boss room. Once the player defeats the cyclop boss, the player must travel down to the next floor where the enemies become faster and stronger. There are randomly spawned items that the player can pick up to help them along the way. If the player manages to defeat the boss on the 3rd floor, the player will beat the game. 
 
 
-A short description of the project's name and what it does. This may be taken from your design docs.
+How to run the game:
+There are multiple files that need to be in the same directory: 
+app.py, rooms.py, monsters.py, sprites.py, player.py, StacksAndQueues.py, cmu_112_graphics.py
+User must be able to run a python file
+PIL/Pillow must also be downloaded (details on how to install these are here: https://www.cs.cmu.edu/~112/notes/notes-animations-part1.html)
+The main file is app.py and the user must run this file to run the game.
 
-How to run the project. For example, which file the user should run in an editor. If your project uses data/source files, also describe how the user should set those up.
+Libraries used:
+cmu_112_graphics
+PIL/Pillow for images
 
-Which libraries you're using that need to be installed, if any. If you can include the library in the submission, that is preferred.
+Commands:
+W - UP
+A - LEFT
+S - DOWN 
+D - RIGHT
+Left-Mouse - Shoots in any direction
+Arrow keys - Shoots in cardinal directions
+SPACE - Special Attack(Hits touching monsters harder and sends shots in all directions)
+M - MAP
+R - Restarts Game
+B - Boss room
+C - Debug mode: No damage, Noclip, Unlimited Mana, Enter any door
 
-A list of any shortcut commands that exist. Shortcut commands can be used to demonstrate specific features by skipping forward in a game or loading sample data. They're useful for when you're testing your code too!
 
 
 
-
-# Overview:
+# Overall goals:
 -Roguelike Game
 -Everything is randomized
 -Random Dungeon generator, that has multiple levels

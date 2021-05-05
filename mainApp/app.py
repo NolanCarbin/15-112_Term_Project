@@ -509,8 +509,12 @@ def drawMonstersHealth(app, canvas):
 
 def drawDoorToNextFloor(app, canvas):
     if len(app.bossRoom.monsters) == 0 and app.currentRoom == app.bossRoom:
+        if Room.floorNumber == 2:
+            color = 'gold2'
+        else:
+            color = 'black'
         canvas.create_rectangle(app.width//2 - app.nextDoorWidth, app.height//2 - app.nextDoorWidth,
-            app.width//2 + app.nextDoorWidth, app.height//2 + app.nextDoorWidth, fill='black')
+            app.width//2 + app.nextDoorWidth, app.height//2 + app.nextDoorWidth, fill=color)
 
 def drawRocks(app, canvas):
     for x,y in app.currentRoom.rocks:

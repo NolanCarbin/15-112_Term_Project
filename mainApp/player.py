@@ -255,7 +255,6 @@ def inBoundsOfItem(app):
 #red
 def healthPack(app):
     app.player.health += 5
-
 #yellow
 def speedUp(app):
     app.player.movementSpeed += 5
