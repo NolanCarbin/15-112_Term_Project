@@ -10,10 +10,17 @@ import random, time
 #############
 
 def appStarted(app):
-    app.floorNumber = 0
+    app.startScreen = True
+    app.infoScreen = False
+    app.startScreenX = random.randint(-100,-80)
+    app.startScreenY = random.randint(-100,-80)
+    app.startCircleDeltaX = 20
+    app.startCircleDeltaY = 20
+    app.startScreenR = 80
     app.doorWidth = 40
     app.nextDoorWidth = 20
     app.itemsWidth = 10
+    app.mapMargin = 140
     app.itemFunctions = {'healthPack': healthPack, 'speedUp': speedUp, 'damageUp': damageUp, 'increaseManaRegen': increaseManaRegen, 'hpUp':hpUp}
     app.doors = {
         'top':[app.width//2 - app.doorWidth, 0, 
@@ -28,8 +35,12 @@ def appStarted(app):
     initializeWorld(app)
     initializePlayerAndMonsters(app)
     initializeSprites(app)
+    app.displayingMap = False
+    app.displayMessage = False
+    app.messageSize = 30
     app.gameOver = False
-    app.cheatsOn = False
+    app.debugOn = False
+    app.playerWonTheGame = False
     ##################
     app.keyPressedTimer = None
     app.totalKeyPressedTimer = None
@@ -56,8 +67,8 @@ def initializeWorld(app):
                 roomPixelList.remove(randomCell)
             #add items:
             chance = random.randrange(1,10)
-            #30% chance to add a random item(x,y,function)
-            if chance in {1,2,3}:
+            #20% chance to add a random item(x,y,function)
+            if chance in {1,2}:
                 randomItem = random.choice(list(app.itemFunctions.keys()))
                 itemData = {'cell': random.choice(roomPixelList), 'function':app.itemFunctions[randomItem], 'name': randomItem}
                 room.items.append(itemData)
@@ -65,9 +76,11 @@ def initializeWorld(app):
             #creates the graph for the specific room
             room.graph = Room.createAdjacencyList(roomPixelList, 40)
             ####################
-    #Adds 3 health packs in 3 random rooms
-    for i in range(3):
+    #Adds 2 health packs in 3 random rooms
+    for i in range(2):
         randomRoom = random.choice(app.rooms)
+        while randomRoom.cell == (0,0):
+            randomRoom = random.choice(app.rooms)
         itemData = {'cell': random.choice(roomPixelList), 'function':app.itemFunctions['healthPack'], 'name': 'healthPack'}
         randomRoom.items.append(itemData)
     #Creates a graph of the rooms not the pixels/used to find the farthest room/boss room
@@ -89,7 +102,6 @@ def initializePlayerAndMonsters(app):
         if room.cell != (0,0) and room.cell != farthestRoomCell:
             for i in range(random.randint(2,5)):
                 room.generateMonster(room.graph, app.width, app.height)
-    
 def initializeSprites(app):
     #Sprites:
     app.wizard = PlayerSpritesheet(app, 'images/wizardSpritesheet.png')
@@ -97,6 +109,7 @@ def initializeSprites(app):
     app.wizard.initializeIdleSpriteList()
     app.wizard.initializeRunningSpriteList()
     app.wizard.initializeAttackSpriteList()
+    app.wizard.initializePhysicalAttackSpriteList()
     app.skeleton = MonsterSpritesheet(app, 'images/skeletonSpritesheet.png')
     app.skeleton.scaleImage(app, 1.7)
     app.skeleton.initializeRunningSpriteList(1.7)
@@ -109,8 +122,6 @@ def initializeSprites(app):
     app.rocksImage = Spritesheet(app, 'images/stones.png')
     app.rocksImage.cropImage(6,539,112,630)
     app.rocksImage.scaleImage(app, .5)
-
-
 
 def findRockRandomCell(app, roomList):
     middleX = app.width//2
@@ -136,9 +147,37 @@ def findRockRandomCell(app, roomList):
     return randomCell
 
 def mousePressed(app, event):
-    app.player.attackWithMouse(app, event.x, event.y)
+    if not app.startScreen and not app.infoScreen:
+        app.player.attackWithMouse(app, event.x, event.y)
+    elif app.startScreen and clickInBoundsOfStart(app, event.x, event.y):
+        app.startScreen = False
+        app.infoScreen = False 
+    elif app.startScreen and clickInBoundsOfInfo(app, event.x, event.y):
+        app.startScreen = False
+        app.infoScreen = True
+    elif app.infoScreen:
+        app.startScreen = True
+        app.infoScreen = False
   
+def clickInBoundsOfStart(app, x, y):
+    buttonX0 = app.width//2 - 60
+    buttonY0 = app.height//2 - 30
+    buttonX1 = app.width//2 + 60
+    buttonY1 = app.height//2 + 30
+    return (x >= buttonX0 - 80 and x <= buttonX1 - 80 and 
+        y >= buttonY0 + 40 and y <= buttonY1 + 40)
+
+def clickInBoundsOfInfo(app, x, y):
+    buttonX0 = app.width//2 - 60
+    buttonY0 = app.height//2 - 30
+    buttonX1 = app.width//2 + 60
+    buttonY1 = app.height//2 + 30
+    return (x >= buttonX0 + 80 and x <= buttonX1 + 80 and 
+        y >= buttonY0 + 40 and y <= buttonY1 + 40)
+
 def keyPressed(app, event):
+    if app.startScreen: return 
+    elif app.infoScreen: return
     #Used for the os delay:
     ###################
     app.keyPressedTimer = time.time()
@@ -155,17 +194,31 @@ def keyPressed(app, event):
         app.currentRoom = app.bossRoom 
         app.currentRoom.hasPlayer = True
         app.currentRoom.player = app.player
-    if event.key == 'c':
-        app.cheatsOn = not app.cheatsOn
-        if app.cheatsOn: print('Cheats are now on')
-        else: print('Cheats are now off')
+    elif event.key == 'Space':
+        app.player.physicalAttack(app)
+    elif event.key == 'm':
+        displayMap(app)
+    elif event.key == 'c':
+        app.debugOn = not app.debugOn
+        if app.debugOn: 
+            app.message = 'Debug mode is now on'
+            app.displayMessage = True
+        else: 
+            app.message = 'Debug mode is now off'
+            app.displayMessage = True
+
+def displayMap(app):
+    app.displayingMap = not app.displayingMap
+
 def restartApp(app):
     Room.rooms = []
     Room.selectionRooms = []
     appStarted(app)
+    Room.floorNumber = 0
+
 
 def advanceToNextFloor(app):
-    currentFloorNumber = app.floorNumber
+    currentFloorNumber = Room.floorNumber
     Room.rooms = []
     Room.selectionRooms = []
     #Old Player Stats:
@@ -177,8 +230,9 @@ def advanceToNextFloor(app):
     manaRegenSpeed = app.player.manaRegenSpeed
     #Reset:
     appStarted(app)
+    app.startScreen = False
     #Previous Player Stats:
-    app.floorNumber = currentFloorNumber + 1
+    Room.floorNumber = currentFloorNumber + 1
     app.player.health = playersCurrentHealth
     app.player.movementSpeed = movementSpeed
     app.player.totalHealth = totalHealth
@@ -193,6 +247,8 @@ def keyReleased(app, event):
     app.wizard.isRunning = False
 
 def timerFired(app):
+    if app.startScreen:
+        movesStartScreenCircle(app)
     #Used for the os delay:
     ##################
     if app.keyPressedTimer != None and time.time() - app.keyPressedTimer >= 0.02:
@@ -224,21 +280,26 @@ def timerFired(app):
     app.bossAttackTimer += 1
     for monster in app.currentRoom.monsters:
         if len(app.currentRoom.monsters) == 0: return 
-        if app.monsterMovementTimer % monster.movementSpeed == 0:
+        if app.monsterMovementTimer % (monster.movementSpeed - Room.floorNumber) == 0:
             monster.moveTowardPlayer(app)
         #The lower the attackSpeed the faster the monsters hit
-        if app.monsterMovementTimer % (monster.attackSpeed - app.floorNumber) == 0:
+        #cant go lower than 0
+        if app.monsterMovementTimer % (monster.attackSpeed - Room.floorNumber) == 0:
             monster.inBoundsOfPlayer(app)
         if app.currentRoom == app.bossRoom:
             if app.bossAttackTimer % monster.shootingSpeed == 0:
                 monster.attackPlayer(app)
     ###################
     #Checks if player killed the boss and if is in bounds of the floor door
-    if (len(app.bossRoom.monsters) == 0 and app.currentRoom.hasPlayer and 
+    if (len(app.bossRoom.monsters) == 0 and app.bossRoom.hasPlayer and 
            (app.player.cx - app.player.width <= app.width//2 + app.nextDoorWidth and 
             app.player.cx + app.player.width >= app.width//2 - app.nextDoorWidth and 
             app.player.cy - app.player.width <= app.height//2 + app.nextDoorWidth and 
             app.player.cy + app.player.width >= app.height//2 - app.nextDoorWidth)):
+        if Room.floorNumber == 2:
+            app.playerWonTheGame = True
+            app.gameOver = True
+            return 
         advanceToNextFloor(app)
     ###################
     #Sprites:
@@ -246,6 +307,8 @@ def timerFired(app):
         app.wizard.incrementAttackingCounter()
     elif app.wizard.isRunning:
         app.wizard.incrementRunningCounter()
+    elif app.wizard.physicalAttacking:
+        app.wizard.incrementPhysicalAttackingCounter()
     else:
         app.wizard.incrementIdleCounter()
     app.skeleton.incrementRunningCounter()
@@ -257,35 +320,68 @@ def timerFired(app):
         app.skeleton.flipSpriteSheet(app.skeleton.runningSprites)
         app.skeleton.flipped = True
         app.boss.flipSpriteSheet(app.boss.runningSprites)
-        app.boss.flipped =True
+        app.boss.flipped = True
+        app.bat.flipSpriteSheet(app.bat.runningSprites)
+        app.bat.flipped = True
     elif app.player.cx >= app.width//2 and app.skeleton.flipped:
         app.skeleton.flipSpriteSheet(app.skeleton.runningSprites)
         app.skeleton.flipped = False
         app.boss.flipSpriteSheet(app.boss.runningSprites)
         app.boss.flipped = False
+        app.bat.flipSpriteSheet(app.bat.runningSprites)
+        app.bat.flipped = False
+
+    ###################
+    if app.displayMessage:
+        app.messageSize -= 1
+        if app.messageSize <= 15:
+            app.displayMessage = False
+            app.messageSize = 30
     ###################
 
+def movesStartScreenCircle(app):
+    if app.startScreenX >= app.width + 200:
+        app.startCircleDeltaX *= -1
+    if app.startScreenX <= -200:
+        app.startCircleDeltaX *= -1
+    if app.startScreenY <= -200:
+        app.startCircleDeltaY *= -1
+    if app.startScreenY >= app.height + 200:
+        app.startCircleDeltaY *= -1
+    app.startScreenX += app.startCircleDeltaX
+    app.startScreenY += app.startCircleDeltaY
+
 def redrawAll(app, canvas):
-    if app.gameOver:
+    if app.gameOver and not app.playerWonTheGame:
         drawGameOver(app, canvas)
+    elif app.startScreen:
+        drawStartScreen(app, canvas)
+    elif app.infoScreen:
+        drawInfoScreen(app, canvas)
+    elif app.gameOver and app.playerWonTheGame:
+        drawWinningScreen(app, canvas)
     else:
         drawRoom(app, canvas)
         drawRocks(app, canvas)
         drawDoorToNextFloor(app, canvas)
-        drawPlayer(app, canvas)
         drawDoors(app, canvas)
+        drawPlayer(app, canvas)
         drawPlayerAttacks(app, canvas)
         drawMonsters(app, canvas)
         drawBossAttacks(app, canvas)
         drawPlayerHealthAndMana(app, canvas)
         drawMonstersHealth(app, canvas)
         drawItems(app, canvas)
-
-
+        drawMessage(app, canvas)
+        drawMap(app, canvas)
 
 #####################
 #Drawing Functions
 #####################
+
+def drawBackground(app, canvas):
+    canvas.create_image(app.width//2, app.height//2, 
+        image=ImageTk.PhotoImage(app.backgroundImage.spritesheet))
 
 def drawPlayer(app, canvas):
     #HitBox:
@@ -297,6 +393,8 @@ def drawPlayer(app, canvas):
         sprite = app.wizard.attackSprites[app.wizard.attackingCounter]
     elif app.wizard.isRunning:
         sprite = app.wizard.runningSprites[app.wizard.runningCounter]
+    elif app.wizard.physicalAttacking:
+        sprite = app.wizard.physicalAttackSprites[app.wizard.physicalAttackCounter]
     else:
         sprite = app.wizard.idleSprites[app.wizard.idleSpriteCounter]
     canvas.create_image(app.player.cx, app.player.cy, image=ImageTk.PhotoImage(sprite))
@@ -322,6 +420,8 @@ def drawRoom(app, canvas):
     else:
         color = 'lightblue4'
     canvas.create_rectangle(0, 0, app.width, app.height, fill=color)
+    if app.currentRoom.cell == (0,0):
+        canvas.create_text(app.width//2, app.height//2, text=f'{Room.floorNumber + 1}', font='Arial 80 bold', fill='white')
 
 #make doors resizable to the window in the future
 def drawDoors(app, canvas):
@@ -430,6 +530,107 @@ def drawGameOver(app, canvas):
     canvas.create_rectangle(0,0,app.width, app.height, fill='black')
     canvas.create_text(app.width//2, app.height//2, text='GAMEOVER!\nYOU DIED!\nPress r to restart', fill='yellow', font='Arial 24 bold')
 
+def drawMap(app, canvas):
+    if app.displayingMap == False: return 
+    for room in app.rooms:
+        row, col = room.cell
+        if room.cell == (0,0):
+            color = 'white'
+        elif len(room.monsters) >= 1:
+            color = 'dim gray'
+        if room == app.bossRoom and (room == app.currentRoom or len(room.monsters) <= 0):
+            color = 'red'
+        elif len(room.monsters) == 0:
+            color = 'mint cream'
+        centerRow = row + 5 - app.currentRoom.cell[0]
+        centerCol = col + 5 - app.currentRoom.cell[1]
+        x0, y0, x1, y1 = getCellBounds(app, centerRow, centerCol)
+        canvas.create_rectangle(x0, y0, x1, y1, fill=color)
+        if room == app.currentRoom:
+            canvas.create_oval(x0,y0,x1,y1, fill='purple')  
+
+def getCellBounds(app, row, col):
+    gridWidth = app.width - app.mapMargin * 2
+    gridHeight = app.height - app.mapMargin * 2
+    cellWidth = gridWidth / Room.cols
+    cellHeight = gridHeight / Room.rows
+    x0 = app.mapMargin + col * cellWidth 
+    y0 = app.mapMargin + row * cellHeight 
+    x1 = x0 + cellWidth
+    y1 = y0 + cellHeight
+    return (x0, y0, x1, y1)
+
+def drawMessage(app, canvas):
+    if app.displayMessage:
+        canvas.create_text(app.width//2, app.height//2, text=f'{app.message}', 
+            font=f'Arial {app.messageSize} bold', fill='white')
+
+def drawStartScreen(app, canvas):
+    canvas.create_rectangle(0,0,app.width, app.height, fill='MediumPurple4')
+    canvas.create_rectangle(15,15, app.width - 15, app.height - 15, width=4)
+    canvas.create_oval(app.startScreenX - app.startScreenR, app.startScreenY - app.startScreenR,
+        app.startScreenX + app.startScreenR, app.startScreenY + app.startScreenR, fill='white')
+    canvas.create_text(app.width//2, app.height//4, text='Dungeon Wizard', font='Arial 36 bold', fill='white')
+    buttonX0 = app.width//2 - 60
+    buttonY0 = app.height//2 - 30
+    buttonX1 = app.width//2 + 60
+    buttonY1 = app.height//2 + 30
+    canvas.create_rectangle(buttonX0 - 80, buttonY0 + 40, buttonX1 - 80, buttonY1 + 40, width=4)
+    canvas.create_rectangle(buttonX0 + 80, buttonY0 + 40, buttonX1 + 80, buttonY1 + 40, width=4)
+    canvas.create_text(app.width//2 - 80, app.height//2 + 40, text='Start', fill='yellow', font='Arial 28 bold')
+    canvas.create_text(app.width//2 + 80, app.height//2 + 40, text='Info', fill='yellow', font='Arial 28 bold')
+    canvas.create_text(app.width//2, app.height//2.8, text='Created by Nolan Carbin', font='Arial 12 bold', fill='white')
+
+def drawInfoScreen(app, canvas):
+    text = '''
+    Controls:
+    W - UP
+    A - LEFT
+    S - DOWN 
+    D - RIGHT
+    Left-Mouse - Shoots in any direction
+    Arrow keys - Shoots in cardinal directions
+    SPACE - Special Attack(Hits touching monsters harder and sends shots in all directions)
+    M - MAP
+    R - Restarts Game
+    B - Boss room
+    C - Debug mode: No damage, Noclip, Unlimited Mana, Enter any door
+
+    Items:
+    Health Packs: increases health by 5
+    Speed Packs: increases movement speed by 5
+    Damage Up Packs: increases damage by 2
+    Mana Regeneration Packs: increases mana regen speed by 2
+    HP up Packs: increases health by 5 and total health by 5
+
+    Goal of the game:
+    Search each room until you find the boss room. 
+    Defeat the boss and travel to the next floor down. 
+    Every level gets increasingly harder. 
+    Once you beat the boss on the 3rd floor, you win the game.
+
+    Credits:
+    Game Created by: Nolan Carbin
+    Special Thanks To Winston Zha and David Kosbie
+
+    Images Used: 
+    Wizard:
+    https://luizmelo.itch.io/wizard-pack
+    Skeleton:
+    https://jesse-m.itch.io/skeleton-pack
+    Cyclops:
+    https://elthen.itch.io/2d-pixel-art-cyclops-sprites?download
+    Stones:
+    https://kvsr.itch.io/stone?download
+    Bat:
+    https://elthen.itch.io/bat-sprite-pack
+    '''
+    canvas.create_text(app.width//2, app.height//2, text=text, font='Arial 8 bold')
+
+def drawWinningScreen(app, canvas):
+    canvas.create_rectangle(0,0, app.width, app.height, fill='gold2')
+    canvas.create_text(app.width//2, app.height//2, text='CONGRATULATIONS\nYOU BEAT THE GAME!', 
+    font='Arial 32 bold', fill='white')
 
 
 ##############

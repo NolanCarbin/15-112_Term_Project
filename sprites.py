@@ -23,8 +23,10 @@ class PlayerSpritesheet(Spritesheet):
         self.idleSprites = []
         self.runningSprites = []
         self.attackSprites = []
-        self.idleSpriteCounter = self.attackingCounter = self.runningCounter = 0
-        self.flipped = self.isRunning = self.attacking = False
+        self.physicalAttackSprites = []
+        self.idleSpriteCounter = self.runningCounter = 0
+        self.attackingCounter = self.physicalAttackCounter = 0
+        self.flipped = self.isRunning = self.attacking = self.physicalAttacking = False
 
     def initializeIdleSpriteList(self):
         margin = 48
@@ -58,6 +60,17 @@ class PlayerSpritesheet(Spritesheet):
             sprite = self.spritesheet.crop((margin + i * distBetweenSprites, topY, 
                                             spriteWidth + i * distBetweenSprites, bottomY))
             self.attackSprites.append(sprite)
+    
+    def initializePhysicalAttackSpriteList(self):
+        margin = 48
+        distBetweenSprites = 162
+        spriteWidth = 135
+        topY = 22
+        bottomY = 100
+        for i in range(22,30):
+            sprite = self.spritesheet.crop((margin + i * distBetweenSprites, topY, 
+                                            spriteWidth + i * distBetweenSprites, bottomY))
+            self.physicalAttackSprites.append(sprite)
 
     def incrementIdleCounter(self):
         self.idleSpriteCounter = (1 + self.idleSpriteCounter) % len(self.idleSprites)
@@ -69,6 +82,11 @@ class PlayerSpritesheet(Spritesheet):
         self.attackingCounter = (1 + self.attackingCounter) % len(self.attackSprites)
         if self.attackingCounter == len(self.attackSprites) - 1:
             self.attacking = False
+
+    def incrementPhysicalAttackingCounter(self):
+        self.physicalAttackCounter = (1 + self.physicalAttackCounter) % len(self.physicalAttackSprites)
+        if self.physicalAttackCounter == len(self.physicalAttackSprites) - 1:
+            self.physicalAttacking = False
 
 class MonsterSpritesheet(Spritesheet):
     def __init__(self, app, filename):

@@ -7,6 +7,7 @@ class Room(object):
     numOfRooms = 10
     rows = 11
     cols = 11
+    floorNumber = 0
     def __init__(self, cell):
         self.cell = cell
         self.hasPlayer = False

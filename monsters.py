@@ -72,7 +72,7 @@ class Monster(object):
             app.player.cx + app.player.width >= self.cx - self.width and 
             app.player.cy - app.player.width <= self.cy + self.width and 
             app.player.cy + app.player.width >= self.cy - self.width): 
-                if app.cheatsOn: return
+                if app.debugOn: return
                 app.player.health -= 1
 
     #taken from: https://www.geeksforgeeks.org/check-if-any-point-overlaps-the-given-circle-and-rectangle/
@@ -97,7 +97,7 @@ class BossMonster(Monster):
         #movementSpeed is inverted, lower == faster
         self.movementSpeed = 8
         #physical attack speed:
-        self.attackSpeed = 2
+        self.attackSpeed = 3
         #inverted lower == faster
         self.shootingSpeed = 10
         self.health = 25
@@ -123,7 +123,7 @@ class BossMonster(Monster):
             if app.player.attackInBoundsOfPlayer(attack['cx'], attack['cy'], attack['radius']):
                 if attack in app.currentRoom.bossAttacks:
                     app.currentRoom.bossAttacks.remove(attack)
-                    if app.cheatsOn: return                
+                    if app.debugOn: return                
                     app.player.health -= 1
     
 class BatMonster(Monster):
@@ -131,7 +131,7 @@ class BatMonster(Monster):
         super().__init__(cx, cy)
         self.width = 20
         #movementSpeed is inverted, lower == faster
-        self.movementSpeed = 3
+        self.movementSpeed = 4
         #physical attack speed:
         self.attackSpeed = 12
         self.health = 2

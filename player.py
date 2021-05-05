@@ -28,7 +28,7 @@ class Player(object):
         deltaX = (x - cx) / self.attackSpeed
         deltaY = (y - cy) / self.attackSpeed
         app.currentRoom.playerAttacks.append({'cx': cx, 'cy': cy, 'radius': radius, 'deltaX': deltaX, 'deltaY':deltaY})
-        if not app.cheatsOn: self.mana -= 2
+        if not app.debugOn: self.mana -= 2
 
     def attackWithKeys(self, app, key):
         if key not in ['Right', 'Left', 'Up', 'Down']: return 
@@ -50,7 +50,7 @@ class Player(object):
         elif key == 'Down':
             deltaY = self.attackSpeed
         app.currentRoom.playerAttacks.append({'cx': cx, 'cy': cy, 'radius': radius, 'deltaX': deltaX, 'deltaY':deltaY})
-        if not app.cheatsOn: self.mana -= 2
+        if not app.debugOn: self.mana -= 2
 
     #taken from: https://www.geeksforgeeks.org/check-if-any-point-overlaps-the-given-circle-and-rectangle/
     #modified to be a method and fit the needs of my app
@@ -66,36 +66,53 @@ class Player(object):
         dy = yn - circleY
         return (dx**2 + dy**2) <= r**2
 
-    
+    def physicalAttack(self, app):
+        if self.mana < 6: return 
+        app.wizard.physicalAttackCounter = 0
+        app.wizard.physicalAttacking = True
+        if not app.debugOn: self.mana -= 6
+        radius = 8
+        deltas = {'right': (self.attackSpeed, 0), 'down': (0, self.attackSpeed), 'left': (-self.attackSpeed, 0), 'up': (0, -self.attackSpeed),
+        'down-right': (self.attackSpeed, self.attackSpeed), 'down-left': (-self.attackSpeed, self.attackSpeed), 'up-left': (-self.attackSpeed, -self.attackSpeed), 'up-right': (self.attackSpeed, -self.attackSpeed)}
+        for key in deltas:
+            deltaX, deltaY = deltas[key]
+            app.currentRoom.playerAttacks.append({'cx': self.cx, 'cy': self.cy, 'radius': radius, 'deltaX': deltaX, 'deltaY':deltaY})
+
 def playerMovement(app, key):
     if key == 'w':
         app.player.cy -= app.player.movementSpeed
         if inBoundsOfRocks(app): app.player.cy += app.player.movementSpeed
         app.wizard.isRunning = True
+        app.wizard.physicalAttacking = app.wizard.attacking = False
     elif key == 's':
         app.player.cy += app.player.movementSpeed
         if inBoundsOfRocks(app): app.player.cy -= app.player.movementSpeed
         app.wizard.isRunning = True
+        app.wizard.physicalAttacking = app.wizard.attacking = False
     elif key in {'a', 'Left'}:
         if key == 'a':
             app.player.cx -= app.player.movementSpeed
             if inBoundsOfRocks(app): app.player.cx += app.player.movementSpeed
         app.wizard.isRunning = True
+        app.wizard.physicalAttacking = app.wizard.attacking = False
         if not app.wizard.flipped:
             app.wizard.flipped = True
             app.wizard.flipSpriteSheet(app.wizard.runningSprites)
             app.wizard.flipSpriteSheet(app.wizard.attackSprites)
             app.wizard.flipSpriteSheet(app.wizard.idleSprites)
+            app.wizard.flipSpriteSheet(app.wizard.physicalAttackSprites)
     elif key in {'d', 'Right'}:
         if key == 'd': 
             app.player.cx += app.player.movementSpeed
             if inBoundsOfRocks(app): app.player.cx -= app.player.movementSpeed
         app.wizard.isRunning = True
+        app.wizard.physicalAttacking = app.wizard.attacking = False
         if app.wizard.flipped:
             app.wizard.flipped = False
             app.wizard.flipSpriteSheet(app.wizard.runningSprites)
             app.wizard.flipSpriteSheet(app.wizard.attackSprites)
             app.wizard.flipSpriteSheet(app.wizard.idleSprites)
+            app.wizard.flipSpriteSheet(app.wizard.physicalAttackSprites)
 
     checkIfChangeOfRoom(app)
     inBoundsOfRoom(app)
@@ -114,14 +131,17 @@ def movePlayerAttacks(app):
         for monster in app.currentRoom.monsters:
             if monster.attackInBoundsOfMonster(attack['cx'], attack['cy'], attack['radius']):
                 if attack in app.currentRoom.playerAttacks:
-                    app.currentRoom.playerAttacks.remove(attack)                
-                    monster.health -= app.player.attackDamage
+                    app.currentRoom.playerAttacks.remove(attack) 
+                    if app.wizard.physicalAttacking:
+                        monster.health -= app.player.attackDamage * 2 
+                    else:              
+                        monster.health -= app.player.attackDamage
                 if monster.health <= 0:
                     app.currentRoom.monsters.remove(monster)
 
 def checkIfChangeOfRoom(app):
     #checks if all monsters in the room are dead
-    if len(app.currentRoom.monsters) == 0 or app.cheatsOn:
+    if len(app.currentRoom.monsters) == 0 or app.debugOn:
         #left door
         if inBoundsOfDoor(app, 'left') and checkIfAdjacentRoom(app, (0,-1)):
             newRoomCell = (app.currentRoom.cell[0] + (0), app.currentRoom.cell[1] + (-1))
@@ -160,7 +180,7 @@ def inBoundsOfRoom(app):
         player.cy = app.height - player.width   
 
 def inBoundsOfRocks(app):
-    if app.cheatsOn: return False
+    if app.debugOn: return False
     player = app.player
     rockWidth = app.currentRoom.rockWidth
     for rockX, rockY in app.currentRoom.rocks:
@@ -230,7 +250,8 @@ def inBoundsOfItem(app):
                     name = 'HP UP PACK'
                 app.message = f"YOU PICKED UP A {name}"
                 print(app.message)
-                #call a function that draws the message on the screen
+                app.displayMessage = True
+
 #red
 def healthPack(app):
     app.player.health += 5

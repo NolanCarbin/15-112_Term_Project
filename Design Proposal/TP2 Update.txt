@@ -24,6 +24,7 @@ Next steps for TP3:
 -Add a small map upper right
 -Add a starting screen 
 -Add 1 more monster
+-When you pick up an item it displays the message
 -cache images?
 
 Completed:
