@@ -1,6 +1,6 @@
 Project Description:
-    Name - Archelight
-    Description - Archelight is dungeon crawler video game, that has many randomized aspects, including randomly generated floors, monsters, items, etc. 
+    Name - Dungeon Wizard
+    Description - Dungeon Wizard is dungeon crawler video game, that has many randomized aspects, including randomly generated floors, monsters, items, etc. 
 
 Competitive Analysis:
     1 paragraph analysis of similar projects, how my project will be similar or different to those:
@@ -43,3 +43,44 @@ Module List:
     List of all outside modules:
     PIL/Pillow
 
+
+TP2 Update:
+
+The organization of the files has changed. Instead of grouping the different files by app, classes, functions, I am now grouping them as app, rooms, monsters, player, sprites. Each file contains the classes, functions, methods that are related to the named catergory. 
+- There are three seperate spritesheets in the images folder. Sources are in the imageSrcs.txt file
+- Instead of using A* algorithm, I only implemented BFS. Because of lack of level design and no actual additional costs to move around the room, I felt that A* wasn't necessary at this moment. However, if the level design complexity increases, I may or may not choose to implement A* or Dijkstra's Algorithm. 
+
+
+Things completed since TP1:
+    -Created a way to represent the room as a grid of pixels. 
+    -Created algorithms to create an adjacency list(graph) for the rooms. 
+    -Added BFS for monsters to find path to player, and moved them toward player.
+    -Used BFS to find the farthest room generated to use as the boss room. 
+    -Added health HUD for player and monsters/boss.
+    -Spritesheet classes were created for the wizard/player, skeleton/monsters, and cyclops/boss.
+    -Added Boss attacking mechanics (moves toward player, and shoots fire balls at players location)
+    -Player can attack with both keys in cardnial directions and with mouse clicking in any directions
+    -Player can only change room once all monster in the current room are dead. 
+    -OS key pressed delay is much better. 
+    -Added timers that call the lastkeypressed again if the timer goes over 0.02 seconds.
+
+
+TP3 Updated:
+
+Name changed to 'Dungeon Wizard'
+
+Completed since TP2:
+-Added obstacles(rocks)
+    -player/monsters cannot move through rocks
+-Added bat monster that uses bfs but follows the path until the end before searching for the player again
+-Added 5 items to change the players mechanics
+-Added when player picks up an item it displays the message/item picked up
+-Added a mana mechanic 
+-Added 2 health packs per floor in random rooms 
+-Once player beats the boss, and goes down to the next floor, the monster move faster and attack harder
+-Changed doors and added walls 
+-Added a special attack with sprite
+    -shoots in 8 directions and any monster touching the player when its used will take 2x damage
+-Added a map when the player presses M
+-Added a starting screen, a info screen, a winning screen
+    -winning screen displays when player beats the 3rd floor boss and goes down the 
