@@ -43,4 +43,3 @@ C - Debug mode: No damage, Noclip, Unlimited Mana, Enter any door
 -Each floor has a boss room, once you beat the boss the player can go down a level(can't go back up)
 -Once a player goes down a floor the data storing the floor above should clear the data so that the game doesn't get too slow. 
 -Once the player enters a room the doors lock until the player defeats all of the monsters.
-
