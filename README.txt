@@ -1,7 +1,7 @@
 # 15-112_Term_Project
 
 Name - Dungeon Wizard
-Description - Dungeon Wizard is Roguelike video game, that has many randomized aspects, including randomly generated floors, monsters, bosses, and items. The player plays as a wizard that traverses multiple rooms and floors, trying to find the boss room. Once the player defeats the cyclop boss, the player must travel down to the next floor where the enemies become faster and stronger. There are randomly spawned items that the player can pick up to help them along the way. If the player manages to defeat the boss on the 3rd floor, the player will beat the game. 
+Description - Dungeon Wizard is Roguelike video game, that has many randomized aspects, including randomly generated floors, monsters, bosses, and items. The player plays as a wizard that traverses multiple rooms and floors, trying to find the boss room. Once the player defeats the cyclops boss, the player must travel down to the next floor where the enemies become faster and stronger. There are randomly spawned items that the player can pick up to help them along the way. If the player manages to defeat the boss on the 3rd floor, the player will beat the game. 
 
 
 How to run the game:
